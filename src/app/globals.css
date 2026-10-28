@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-warning: var(--warning);
+  --color-ring: var(--ring);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+:root {
+  --background: #f6f8f3;
+  --foreground: #11201a;
+  --card: #ffffff;
+  --muted: #e9efe4;
+  --muted-foreground: #46564d;
+  --border: #cfd9c8;
+  --primary: #0b5d3b;
+  --primary-foreground: #ffffff;
+  --accent: #d4f23a;
+  --accent-foreground: #11201a;
+  --destructive: #b42318;
+  --warning: #8a5a00;
+  --ring: #0b5d3b;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
