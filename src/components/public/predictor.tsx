@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { MotionConfig, motion } from "motion/react";
 import { ArrowLeftRight } from "lucide-react";
 import { PlayerPicker, type PickerPlayer } from "@/components/ui/player-picker";
+import { WinBySelector } from "@/components/ui/win-by-selector";
+import { DEFAULT_WIN_BY, winByLabel, type WinBy } from "@/lib/rating/config";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +19,7 @@ type Target = (typeof TARGETS)[number];
 export function Predictor({ players, beta }: { players: PickerPlayer[]; beta: number }) {
   const [sel, setSel] = useState<(string | null)[]>([null, null, null, null]);
   const [target, setTarget] = useState<Target>(11);
+  const [winBy, setWinBy] = useState<WinBy>(DEFAULT_WIN_BY);
 
   const set = (i: number, id: string | null) => setSel((s) => s.map((v, j) => (j === i ? id : v)));
   const byId = useMemo(() => new Map(players.map((p) => [p.id, p])), [players]);
@@ -26,8 +29,8 @@ export function Predictor({ players, beta }: { players: PickerPlayer[]; beta: nu
   const prediction = useMemo(() => {
     if (!ready) return null;
     const r = picked.map((p) => p!.rating) as [number, number, number, number];
-    return predictMatch(r, target, { beta });
-  }, [ready, picked, target, beta]);
+    return predictMatch(r, target, { beta }, winBy);
+  }, [ready, picked, target, beta, winBy]);
 
   const teamNames = (a: number, b: number) => `${picked[a]?.name ?? "—"} & ${picked[b]?.name ?? "—"}`;
   const anyProvisional = picked.some((p) => p?.provisional);
@@ -78,6 +81,7 @@ export function Predictor({ players, beta }: { players: PickerPlayer[]; beta: nu
               ))}
             </div>
           </fieldset>
+          <WinBySelector value={winBy} onChange={setWinBy} />
         </Card>
 
         <Card className="space-y-5" aria-live="polite">
@@ -116,7 +120,7 @@ export function Predictor({ players, beta }: { players: PickerPlayer[]; beta: nu
                   />
                   <div className="h-full flex-1 bg-accent" />
                 </div>
-                <p className="text-xs text-muted-foreground">Chance to win a game to {target} (win by 2).</p>
+                <p className="text-xs text-muted-foreground">Chance to win a game to {target} ({winByLabel(winBy)}).</p>
               </div>
 
               <dl className="grid grid-cols-2 gap-3 text-sm">
@@ -146,7 +150,7 @@ export function Predictor({ players, beta }: { players: PickerPlayer[]; beta: nu
               rallies a team is expected to win. A team that wins 55% of points wins a game far more often than 55%.
             </p>
             <p>
-              Win probability assumes every rally is independent and won with that point share. It is a simplified model, still
+              Win probability assumes every rally is independent and won with that point share. With Win by 1 it is the chance of reaching the target first; with Win by 2 the winner must also lead by two. It is a simplified model, still
               uncalibrated against our group&apos;s results, so treat it as a guide, not a prediction.
             </p>
           </div>

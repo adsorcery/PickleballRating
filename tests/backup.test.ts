@@ -21,7 +21,7 @@ async function seededDb() {
     createPlayer(opened.db, actor, { displayName: `B${i}`, initialRating: r, duprRating: null, avatarUrl: null, notes: null }),
   );
   confirmNewMatch(opened.db, actor, {
-    teamA: [ids[0], ids[1]], teamB: [ids[2], ids[3]], playedAtLocal: "2026-03-01T10:00", formatTarget: 11,
+    teamA: [ids[0], ids[1]], teamB: [ids[2], ids[3]], playedAtLocal: "2026-03-01T10:00", formatTarget: 11, winBy: 2,
     scoreA: 11, scoreB: 4, rated: true, notes: null, idempotencyKey: "backup-test-1",
   }, { now: new Date("2026-06-01T00:00:00Z") });
   return { dir, opened };

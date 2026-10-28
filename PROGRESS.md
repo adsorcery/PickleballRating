@@ -31,3 +31,9 @@
 - Scheduled online-backup API snapshots (verified, gzipped, pruned, optional S3-compatible off-host upload), `db:restore-check`, admin export (JSON/CSV), CI workflow incl. migration drift check, README with setup/deploy/backup/restore docs.
 - Verified locally against a production build: restart persistence, admin-only mutations (including rejection of a mutation after the session is cleared), browser smoke test (`npm run e2e`), mobile layout check.
 - **Not done here (needs your Render account):** actual deployment, configuring the off-host bucket credentials, and a restore drill on a Render test instance.
+
+## Win by 1 / Win by 2 ✅
+- `matches.win_by` (1|2) stored per match; migration `0001_win_by.sql` is additive (`ALTER TABLE … ADD COLUMN`, no table rebuild). Existing rows are backfilled to 2, so history is validated and replayed exactly as before. New matches default to 1.
+- `users.preferred_win_by` remembers each admin's choice (updated only when changing the rule on the new-match form).
+- Score validation, preview, confirmation, correction, replay and the predictor all take the rule (`src/lib/rating/validation.ts`, `predictor.ts`); the predictor uses the same `WinBySelector` component and constants as match entry. The rating formula is unchanged.
+- Tests: exhaustive score oracle for every target × rule, closed-form win-by-1 probability, acceptance case (11–10 win by 1), legacy migration test proving stored matches, ratings and history are byte-identical and a replay changes nothing.

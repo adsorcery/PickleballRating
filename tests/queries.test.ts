@@ -19,6 +19,7 @@ function match(teamA: number[], teamB: number[], when: string, a = 11, b = 7, ov
     teamB: [ids[teamB[0]], ids[teamB[1]]],
     playedAtLocal: when,
     formatTarget: 11,
+    winBy: 2,
     scoreA: a,
     scoreB: b,
     rated: true,

@@ -34,6 +34,7 @@ function input(over: Partial<MatchInput> = {}): MatchInput {
     teamB: [ids[2], ids[3]],
     playedAtLocal: "2026-03-01T10:00",
     formatTarget: 11,
+    winBy: 2,
     scoreA: 11,
     scoreB: 7,
     rated: true,

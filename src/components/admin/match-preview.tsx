@@ -3,6 +3,7 @@ import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import type { MatchPreview } from "@/lib/services/matches";
 import { formatDateTime } from "@/lib/time";
+import { winByLabel } from "@/lib/rating/config";
 import { displaysAsZero, formatCincoDelta, formatCincoRating } from "@/lib/format";
 import { cn, formatPercent } from "@/lib/utils";
 
@@ -20,7 +21,7 @@ export function MatchPreviewPanel({ preview, scoreA, scoreB }: { preview: MatchP
       </div>
 
       <p className="text-sm text-muted-foreground">
-        {formatDateTime(preview.playedAt, preview.timezone)} · to {preview.formatTarget}
+        {formatDateTime(preview.playedAt, preview.timezone)} · to {preview.formatTarget}, {winByLabel(preview.winBy)}
         {!preview.rated && " · unrated (ratings will not change)"}
       </p>
 

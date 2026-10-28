@@ -4,6 +4,16 @@ export const ALGORITHM_VERSION = "vcpr-v1";
 export const GAME_TARGETS = [11, 15, 21] as const;
 export type GameTarget = (typeof GAME_TARGETS)[number];
 
+/** Margin required to finish a game once the target score has been reached. */
+export const WIN_BY_OPTIONS = [1, 2] as const;
+export type WinBy = (typeof WIN_BY_OPTIONS)[number];
+/** Default for newly entered matches and the predictor. */
+export const DEFAULT_WIN_BY: WinBy = 1;
+/** Matches recorded before the rule was stored were all played win-by-2. */
+export const LEGACY_WIN_BY: WinBy = 2;
+
+export const winByLabel = (winBy: WinBy) => `Win by ${winBy}`;
+
 /** Normal rating scale; stored ratings are never clipped to it. */
 export const DISPLAY_RATING_RANGE = { min: 2, max: 6 } as const;
 

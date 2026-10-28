@@ -6,6 +6,7 @@ import { adminAction } from "@/lib/admin-action";
 import { getDb } from "@/lib/db/client";
 import { ok } from "@/lib/result";
 import { ratingConfigSchema } from "@/lib/rating/config";
+import { setPreferredWinBy } from "@/lib/services/preferences";
 import { publishConfig } from "@/lib/services/config";
 import {
   confirmDraft,
@@ -161,6 +162,13 @@ export async function voidMatchAction(input: unknown): Promise<ActionResult<{ af
     const r = voidMatch(getDb(), admin.id, data.matchId, { reason: data.reason, expectedUpdatedAt: data.expectedUpdatedAt });
     refresh();
     return ok(r);
+  });
+}
+
+export async function setPreferredWinByAction(input: unknown): Promise<ActionResult> {
+  return adminAction(z.object({ winBy: z.union([z.literal(1), z.literal(2)]) }), input, (admin, data) => {
+    setPreferredWinBy(getDb(), admin.id, data.winBy);
+    return ok(undefined);
   });
 }
 

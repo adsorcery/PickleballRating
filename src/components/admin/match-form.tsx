@@ -9,6 +9,7 @@ import {
   correctMatchAction,
   previewMatchAction,
   saveDraftAction,
+  setPreferredWinByAction,
 } from "@/app/admin/actions";
 import { MatchPreviewPanel } from "@/components/admin/match-preview";
 import { ScoreInput } from "@/components/admin/score-input";
@@ -18,6 +19,8 @@ import { Card } from "@/components/ui/card";
 import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PlayerPicker, type PickerPlayer } from "@/components/ui/player-picker";
+import { WinBySelector } from "@/components/ui/win-by-selector";
+import type { WinBy } from "@/lib/rating/config";
 import type { MatchInput, MatchPreview } from "@/lib/services/matches";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +29,7 @@ export interface MatchFormInitial {
   teamB: [string | null, string | null];
   playedAtLocal: string;
   formatTarget: 11 | 15 | 21;
+  winBy: WinBy;
   scoreA: string;
   scoreB: string;
   rated: boolean;
@@ -50,6 +54,7 @@ export function MatchForm({ mode, players, initial, matchId, expectedUpdatedAt }
   const [sel, setSel] = useState<(string | null)[]>([...initial.teamA, ...initial.teamB]);
   const [playedAt, setPlayedAt] = useState(initial.playedAtLocal);
   const [format, setFormat] = useState<11 | 15 | 21>(initial.formatTarget);
+  const [winBy, setWinBy] = useState<WinBy>(initial.winBy);
   const [scoreA, setScoreA] = useState(initial.scoreA);
   const [scoreB, setScoreB] = useState(initial.scoreB);
   const [rated, setRated] = useState(initial.rated);
@@ -71,13 +76,14 @@ export function MatchForm({ mode, players, initial, matchId, expectedUpdatedAt }
       teamB: [sel[2]!, sel[3]!],
       playedAtLocal: playedAt,
       formatTarget: format,
+      winBy,
       scoreA: a,
       scoreB: b,
       rated,
       notes: notes.trim() || null,
       idempotencyKey: key,
     };
-  }, [sel, scoreA, scoreB, playedAt, format, rated, notes, key]);
+  }, [sel, scoreA, scoreB, playedAt, format, winBy, rated, notes, key]);
 
   // The idempotency key is excluded so regenerating it never invalidates a preview.
   const contentKey = input ? JSON.stringify({ ...input, idempotencyKey: undefined }) : null;
@@ -189,6 +195,14 @@ export function MatchForm({ mode, players, initial, matchId, expectedUpdatedAt }
           <ScoreInput label="Team A score" value={scoreA} onChange={setScoreA} />
           <ScoreInput label="Team B score" value={scoreB} onChange={setScoreB} />
         </div>
+        <WinBySelector
+          value={winBy}
+          onChange={(w) => {
+            setWinBy(w);
+            // Only new-match entry updates the remembered preference; editing an old match must not.
+            if (mode === "new") void setPreferredWinByAction({ winBy: w });
+          }}
+        />
         {err("scoreA") && <p className="text-sm font-semibold text-destructive">{err("scoreA")}</p>}
 
         <div className="grid gap-4 sm:grid-cols-2">

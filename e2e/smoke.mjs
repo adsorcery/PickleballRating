@@ -46,6 +46,11 @@ await page.getByRole("option", { name: /Demo Drew/ }).first().click();
 const a11 = parseFloat(await page.getByTestId("win-a").getAttribute("data-value"));
 const b11 = parseFloat(await page.getByTestId("win-b").getAttribute("data-value"));
 assert.ok(Math.abs(a11 + b11 - 1) < 1e-9, `sum ${a11 + b11}`);
+await page.getByText("Win by 2", { exact: true }).click();
+const winBy2 = parseFloat(await page.getByTestId("win-a").getAttribute("data-value"));
+await page.getByText("Win by 1", { exact: true }).click();
+const winBy1 = parseFloat(await page.getByTestId("win-a").getAttribute("data-value"));
+assert.ok(winBy1 < winBy2, "win by 1 should be less decisive than win by 2 for the favourite");
 await page.getByText("21", { exact: true }).click();
 const a21 = parseFloat(await page.getByTestId("win-a").getAttribute("data-value"));
 assert.notEqual(a11, a21, "format should change probability");
@@ -108,8 +113,35 @@ await row.getByRole("link", { name: NEWBIE }).click();
 await page.getByRole("heading", { name: NEWBIE }).waitFor();
 await shot("profile");
 
+// ---- ACCEPTANCE: 11-10 to 11 with Win by 1 saves, and all four ratings are recalculated
+await page.goto(`${BASE}/admin/matches/new`);
+await page.getByText("Win by 1", { exact: true }).click();
+await pick("Player 1", "Demo Casey");
+await pick("Player 2", "Demo Drew");
+await pick("Player 3", "Demo Gray");
+await pick("Player 4", "Demo Harper");
+await page.getByRole("spinbutton", { name: "Team A score" }).fill("11");
+await page.getByRole("spinbutton", { name: "Team B score" }).fill("10");
+await page.getByRole("button", { name: "Preview changes" }).click();
+await page.getByText("Projected — not saved until you confirm").waitFor();
+await page.getByText(/to 11, Win by 1/).waitFor();
+const ack = page.getByLabel(/not a duplicate/); // present when re-running against the same data
+if (await ack.count()) await ack.check();
+await page.getByRole("button", { name: "Confirm & save match" }).click();
+await page.getByText(/Match confirmed/).waitFor();
+await page.goto(BASE + "/matches");
+assert.ok((await page.locator("main").innerText()).includes("Win by 1"), "match list shows its rule");
+
+// ---- the preferred rule is remembered for the next match
+await page.goto(`${BASE}/admin/matches/new`);
+await page.getByText("Win by 2", { exact: true }).click();
+await page.waitForTimeout(500);
+await page.reload();
+assert.ok(await page.getByRole("radio", { name: "Win by 2" }).isChecked(), "preference should persist");
+
 // ---- invalid score rejected by the server
 await page.goto(`${BASE}/admin/matches/new`);
+await page.getByText("Win by 2", { exact: true }).click();
 await pick("Player 1", "Demo Avery");
 await pick("Player 2", "Demo Blake");
 await pick("Player 3", "Demo Casey");

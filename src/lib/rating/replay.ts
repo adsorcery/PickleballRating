@@ -1,5 +1,5 @@
 import { localDayKey } from "@/lib/time";
-import { DISPLAY_RATING_RANGE, type GameTarget, type RatingConfig } from "./config";
+import { DISPLAY_RATING_RANGE, type GameTarget, type RatingConfig, type WinBy } from "./config";
 import { computeMatchUpdate, effectiveK, type Four } from "./engine";
 import { gameWinProbability } from "./predictor";
 import { validateScore } from "./validation";
@@ -15,6 +15,8 @@ export interface ReplayMatch {
   playedAt: number;
   createdAt: number;
   formatTarget: GameTarget;
+  /** The rule this match was played under (stored per match; legacy rows are win by 2). */
+  winBy: WinBy;
   scoreA: number;
   scoreB: number;
   rated: boolean;
@@ -87,7 +89,7 @@ export function replay(players: readonly ReplayPlayer[], matches: readonly Repla
     const ids = [match.teamA[0], match.teamA[1], match.teamB[0], match.teamB[1]] as const as Four<string>;
     if (new Set(ids).size !== 4) throw new ReplayError(`Match ${match.id} does not have four distinct players`);
     for (const id of ids) if (!ratings.has(id)) throw new ReplayError(`Match ${match.id} references unknown player ${id}`);
-    const check = validateScore(match.scoreA, match.scoreB, match.formatTarget);
+    const check = validateScore(match.scoreA, match.scoreB, match.formatTarget, match.winBy);
     if (!check.valid) throw new ReplayError(`Match ${match.id} has an invalid score: ${check.reason}`);
 
     const config = match.config;
@@ -100,7 +102,7 @@ export function replay(players: readonly ReplayPlayer[], matches: readonly Repla
     const kEff = effectiveK(priorSameSetGames, config);
 
     const update = computeMatchUpdate({ ratings: pre, priorGames, scoreA: match.scoreA, scoreB: match.scoreB, kEff, config });
-    const winProbA = gameWinProbability(update.expectedShareA, match.formatTarget);
+    const winProbA = gameWinProbability(update.expectedShareA, match.formatTarget, match.winBy);
 
     const delta: Four<number> = match.rated ? update.deltas : [0, 0, 0, 0];
     const post = pre.map((r, i) => r + delta[i]) as unknown as Four<number>;

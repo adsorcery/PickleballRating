@@ -44,7 +44,7 @@ For ratings `r1, r2` vs `r3, r4`:
 - Interpret `p` as Team A's **expected share of points**, not its probability of winning the game.
 - With actual score `a:b`, `s = a / (a+b)`.
 - Team-average shift `d = clamp(K_eff * (s-p), -0.08, +0.08)`; base `K = 0.35`.
-- For valid games, a+b > 0, scores are non-negative integers, and the chosen target is 11, 15, or 21 with a lead of >= 2, ending as soon as rules permit. Admin can mark a retirement/forfeit as **unrated**, but do not feed that result to the algorithm.
+- For valid games, a+b > 0, scores are non-negative integers, and the chosen target is 11, 15, or 21 and the game ended as soon as the match's stored winning rule permits (**win by 1**, the default for new matches: first to the target; or **win by 2**: at least the target with a lead of >= 2). Matches recorded before the rule was stored are win by 2. Admin can mark a retirement/forfeit as **unrated**, but do not feed that result to the algorithm.
 
 ### Individual reliability and zero-sum distribution
 
@@ -86,7 +86,7 @@ Create form: display name (required), initial Cinco Point (required, decimal, su
 
 ## 5. Match submission and score validation
 
-Select exactly 4 distinct active players. Place two on each team. Choose match date/time, format to 11/15/21, final scores. Verify no ties and valid win-by-2 ending. Show before submit: pre-match averages, expected point shares, match-winning probability, final scores, projected rating changes for each player, provisional weighting, repeated-match discount, post-match ratings. Confirm action writes match + all four rating changes + current player ratings in a single transaction. Implement an idempotency key to prevent double-submit; additionally warn on suspected same-four/score/time duplicates. Admin can save as draft; drafts are excluded from public pages and calculations.
+Select exactly 4 distinct active players. Place two on each team. Choose match date/time, format to 11/15/21, final scores. Choose the winning rule (win by 1 by default, remembered per admin) and verify no ties and a valid ending under that rule. Show before submit: pre-match averages, expected point shares, match-winning probability, final scores, projected rating changes for each player, provisional weighting, repeated-match discount, post-match ratings. Confirm action writes match + all four rating changes + current player ratings in a single transaction. Implement an idempotency key to prevent double-submit; additionally warn on suspected same-four/score/time duplicates. Admin can save as draft; drafts are excluded from public pages and calculations.
 
 ## 6. Data model (Drizzle/SQLite)
 

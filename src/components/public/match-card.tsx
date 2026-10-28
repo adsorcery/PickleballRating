@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import type { MatchListItem, MatchSide } from "@/lib/queries";
 import { formatDateTime } from "@/lib/time";
+import { winByLabel } from "@/lib/rating/config";
 import { displaysAsZero, formatCincoDelta } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -34,7 +35,7 @@ export function MatchCard({ match, timezone, showDeltas = true }: { match: Match
     <article className="min-w-0 rounded-xl border border-border bg-card p-3">
       <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
         <time dateTime={new Date(match.playedAt).toISOString()}>{formatDateTime(match.playedAt, timezone)}</time>
-        <Badge>To {match.formatTarget}</Badge>
+        <Badge>To {match.formatTarget} · {winByLabel(match.winBy)}</Badge>
         {!match.rated && <Badge variant="warning">Unrated</Badge>}
       </div>
       <div className="space-y-1">

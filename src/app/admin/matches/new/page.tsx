@@ -4,6 +4,7 @@ import { getTimezone } from "@/lib/app-config";
 import { requireAdminPage } from "@/lib/auth/guard";
 import { getDb } from "@/lib/db/client";
 import { listSelectablePlayers } from "@/lib/queries";
+import { getPreferredWinBy } from "@/lib/services/preferences";
 import { nowLocalInput } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +33,7 @@ export default async function NewMatchPage() {
             teamB: [null, null],
             playedAtLocal: nowLocalInput(tz),
             formatTarget: 11,
+            winBy: getPreferredWinBy(db, admin.id),
             scoreA: "0",
             scoreB: "0",
             rated: true,

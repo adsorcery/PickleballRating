@@ -61,10 +61,10 @@ describe("formatCincoDelta", () => {
 
 describe("calculations keep full precision", () => {
   it("predictions use the unrounded ratings, not the displayed ones", () => {
-    const raw = predictMatch([3.229473, 3.5, 3.1, 3.4], 11, DEFAULT_RATING_CONFIG);
-    const rounded = predictMatch([3.23, 3.5, 3.1, 3.4], 11, DEFAULT_RATING_CONFIG);
+    const raw = predictMatch([3.229473, 3.5, 3.1, 3.4], 11, DEFAULT_RATING_CONFIG, 2);
+    const rounded = predictMatch([3.23, 3.5, 3.1, 3.4], 11, DEFAULT_RATING_CONFIG, 2);
     expect(raw.winProbA).not.toBe(rounded.winProbA);
-    expect(raw.winProbA).toBe(gameWinProbability(raw.pointShareA, 11));
+    expect(raw.winProbA).toBe(gameWinProbability(raw.pointShareA, 11, 2));
   });
 
   describe("stored data", () => {
@@ -79,7 +79,7 @@ describe("calculations keep full precision", () => {
       );
       for (let i = 0; i < 3; i++) {
         confirmNewMatch(db, actor, {
-          teamA: [ids[0], ids[1]], teamB: [ids[2], ids[3]], playedAtLocal: `2026-03-0${i + 1}T10:00`, formatTarget: 11,
+          teamA: [ids[0], ids[1]], teamB: [ids[2], ids[3]], playedAtLocal: `2026-03-0${i + 1}T10:00`, formatTarget: 11, winBy: 2,
           scoreA: 11, scoreB: 3 + i * 2, rated: true, notes: null, idempotencyKey: `format-test-${i}`,
         }, { now: new Date("2026-06-01T00:00:00Z") });
       }

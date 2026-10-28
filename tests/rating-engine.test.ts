@@ -59,43 +59,43 @@ describe("expected point share", () => {
 
 describe("game win probability", () => {
   it.each([11, 15, 21])("is 0.5 when p = 0.5 (n=%i)", (n) => {
-    expect(gameWinProbability(0.5, n)).toBeCloseTo(0.5, 12);
+    expect(gameWinProbability(0.5, n, 2)).toBeCloseTo(0.5, 12);
   });
 
   it("handles the extremes", () => {
-    expect(gameWinProbability(1, 11)).toBe(1);
-    expect(gameWinProbability(0, 11)).toBe(0);
+    expect(gameWinProbability(1, 11, 2)).toBe(1);
+    expect(gameWinProbability(0, 11, 2)).toBe(0);
   });
 
   it.each([11, 15, 21])("matches an independent grid propagation (n=%i)", (n) => {
     for (const p of [0.1, 0.35, 0.5, 0.6, 0.77, 0.93]) {
-      expect(gameWinProbability(p, n)).toBeCloseTo(referenceWinProbability(p, n), 9);
+      expect(gameWinProbability(p, n, 2)).toBeCloseTo(referenceWinProbability(p, n), 9);
     }
   });
 
   it("is complementary and monotonic in p, and amplifies point share", () => {
     fc.assert(
       fc.property(fc.double({ min: 0.001, max: 0.999, noNaN: true }), fc.constantFrom(11, 15, 21), (p, n) => {
-        const w = gameWinProbability(p, n);
-        expect(w + gameWinProbability(1 - p, n)).toBeCloseTo(1, 10);
+        const w = gameWinProbability(p, n, 2);
+        expect(w + gameWinProbability(1 - p, n, 2)).toBeCloseTo(1, 10);
         expect(w).toBeGreaterThanOrEqual(0);
         expect(w).toBeLessThanOrEqual(1);
         if (p > 0.5) expect(w).toBeGreaterThanOrEqual(p - 1e-12);
         if (p < 0.5) expect(w).toBeLessThanOrEqual(p + 1e-12);
       }),
     );
-    expect(gameWinProbability(0.55, 11)).toBeLessThan(gameWinProbability(0.6, 11));
+    expect(gameWinProbability(0.55, 11, 2)).toBeLessThan(gameWinProbability(0.6, 11, 2));
   });
 
   it("gives equal-rated teams a 50/50 game and probabilities that sum to 1", () => {
-    const pred = predictMatch([3.2, 4.4, 3.8, 3.8], 15, C);
+    const pred = predictMatch([3.2, 4.4, 3.8, 3.8], 15, C, 2);
     expect(pred.pointShareA).toBeCloseTo(0.5, 12);
     expect(pred.winProbA).toBeCloseTo(0.5, 12);
     expect(pred.winProbA + pred.winProbB).toBeCloseTo(1, 12);
   });
 
   it("rejects invalid targets", () => {
-    expect(() => gameWinProbability(0.5, 0)).toThrow();
+    expect(() => gameWinProbability(0.5, 0, 2)).toThrow();
   });
 });
 
@@ -103,20 +103,20 @@ describe("score validation", () => {
   const ok = [[11, 0], [11, 9], [9, 11], [12, 10], [13, 11], [20, 18], [15, 13], [21, 19], [25, 23]];
   it.each(ok)("accepts %i-%i to 11/15/21 where valid", (a, b) => {
     const target = Math.max(a, b) >= 21 ? 21 : Math.max(a, b) >= 15 ? 15 : 11;
-    expect(validateScore(a, b, target).valid).toBe(true);
+    expect(validateScore(a, b, target, 2).valid).toBe(true);
   });
   it("rejects ties, short games, bad margins and bad inputs", () => {
-    expect(validateScore(11, 11, 11).valid).toBe(false);
-    expect(validateScore(10, 8, 11).valid).toBe(false);
-    expect(validateScore(11, 10, 11).valid).toBe(false);
-    expect(validateScore(12, 11, 11).valid).toBe(false);
-    expect(validateScore(13, 10, 11).valid).toBe(false);
-    expect(validateScore(14, 11, 11).valid).toBe(false);
-    expect(validateScore(11, 9, 15).valid).toBe(false);
-    expect(validateScore(-1, 11, 11).valid).toBe(false);
-    expect(validateScore(11.5, 3, 11).valid).toBe(false);
-    expect(validateScore(11, 3, 12).valid).toBe(false);
-    expect(validateScore(0, 0, 11).valid).toBe(false);
+    expect(validateScore(11, 11, 11, 2).valid).toBe(false);
+    expect(validateScore(10, 8, 11, 2).valid).toBe(false);
+    expect(validateScore(11, 10, 11, 2).valid).toBe(false);
+    expect(validateScore(12, 11, 11, 2).valid).toBe(false);
+    expect(validateScore(13, 10, 11, 2).valid).toBe(false);
+    expect(validateScore(14, 11, 11, 2).valid).toBe(false);
+    expect(validateScore(11, 9, 15, 2).valid).toBe(false);
+    expect(validateScore(-1, 11, 11, 2).valid).toBe(false);
+    expect(validateScore(11.5, 3, 11, 2).valid).toBe(false);
+    expect(validateScore(11, 3, 12, 2).valid).toBe(false);
+    expect(validateScore(0, 0, 11, 2).valid).toBe(false);
   });
   it("accepts exactly the games that end as soon as the rules permit", () => {
     fc.assert(
@@ -124,7 +124,7 @@ describe("score validation", () => {
         const w = Math.max(a, b);
         const l = Math.min(a, b);
         const expected = w >= n && w - l >= 2 && (w === n || w - l === 2);
-        expect(validateScore(a, b, n).valid).toBe(expected);
+        expect(validateScore(a, b, n, 2).valid).toBe(expected);
       }),
     );
   });

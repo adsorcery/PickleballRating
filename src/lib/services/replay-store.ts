@@ -1,7 +1,7 @@
 import { and, eq, sql } from "drizzle-orm";
 import type { Executor } from "@/lib/db/client";
 import { matches, matchPlayers, players, ratingHistory } from "@/lib/db/schema";
-import { parseRatingConfig, type GameTarget } from "@/lib/rating/config";
+import { parseRatingConfig, type GameTarget, type WinBy } from "@/lib/rating/config";
 import { replay, type ReplayMatch, type ReplayMatchResult, type ReplayPlayer, type ReplayResult } from "@/lib/rating/replay";
 
 export interface ReplayInputs {
@@ -40,6 +40,7 @@ export function loadReplayInputs(ex: Executor): ReplayInputs {
       playedAt: m.playedAt.getTime(),
       createdAt: m.createdAt.getTime(),
       formatTarget: m.formatTarget as GameTarget,
+      winBy: m.winBy as WinBy,
       scoreA: m.scoreA,
       scoreB: m.scoreB,
       rated: m.rated,

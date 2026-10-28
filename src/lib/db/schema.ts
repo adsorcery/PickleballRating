@@ -39,6 +39,8 @@ export const users = sqliteTable("users", {
   role: text("role", { enum: ["admin"] })
     .notNull()
     .default("admin"),
+  /** Admin's preferred winning rule for the match-entry form (1 or 2). */
+  preferredWinBy: integer("preferred_win_by").notNull().default(1),
   createdAt: ts("created_at").notNull(),
   lastLoginAt: ts("last_login_at"),
 });
@@ -81,6 +83,9 @@ export const matches = sqliteTable(
     createdAt: ts("created_at").notNull(),
     updatedAt: ts("updated_at").notNull(),
     formatTarget: integer("format_target").notNull(),
+    // Rows that existed before this column was added were all played win-by-2, hence the DB default of 2.
+    // The application always writes the value explicitly (new matches default to 1).
+    winBy: integer("win_by").notNull().default(2),
     scoreA: integer("score_a").notNull(),
     scoreB: integer("score_b").notNull(),
     status: text("status", { enum: ["draft", "confirmed", "void"] }).notNull(),

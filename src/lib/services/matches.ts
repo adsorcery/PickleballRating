@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import type { Db, Executor } from "@/lib/db/client";
 import { matches, matchPlayers, players, predictionSnapshots } from "@/lib/db/schema";
-import { parseRatingConfig, type GameTarget, type RatingConfig } from "@/lib/rating/config";
+import { DEFAULT_WIN_BY, parseRatingConfig, type GameTarget, type RatingConfig, type WinBy } from "@/lib/rating/config";
 import { predictMatch } from "@/lib/rating/predictor";
 import { replay, type ReplayMatch, type ReplayMatchResult } from "@/lib/rating/replay";
 import { validateScore } from "@/lib/rating/validation";
@@ -20,6 +20,7 @@ export const matchInputSchema = z.object({
   teamB: z.tuple([playerId, playerId]),
   playedAtLocal: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, "Enter a valid date and time"),
   formatTarget: z.union([z.literal(11), z.literal(15), z.literal(21)]),
+  winBy: z.union([z.literal(1), z.literal(2)]).default(DEFAULT_WIN_BY),
   scoreA: z.number().int().min(0).max(99),
   scoreB: z.number().int().min(0).max(99),
   rated: z.boolean(),
@@ -57,6 +58,7 @@ export interface MatchPreview {
   playedAt: number;
   timezone: string;
   formatTarget: GameTarget;
+  winBy: WinBy;
   rated: boolean;
   prediction: { teamARating: number; teamBRating: number; pointShareA: number; winProbA: number; winProbB: number };
   players: PreviewPlayer[];
@@ -95,7 +97,7 @@ function prepare(
   if (playedAt === null) fieldError("playedAtLocal", "Enter a valid date and time.");
   if (playedAt > opts.now.getTime() + MAX_FUTURE_MS) fieldError("playedAtLocal", "Match time cannot be in the future.");
   if (opts.requireValidScore) {
-    const v = validateScore(input.scoreA, input.scoreB, input.formatTarget);
+    const v = validateScore(input.scoreA, input.scoreB, input.formatTarget, input.winBy);
     if (!v.valid) fieldError("scoreA", v.reason);
   }
   return { ids, playedAt, names: new Map(rows.map((p) => [p.id, p.displayName])) };
@@ -163,6 +165,7 @@ function toReplayMatch(id: string, prepared: Prepared, input: MatchInput, create
     playedAt: prepared.playedAt,
     createdAt,
     formatTarget: input.formatTarget,
+    winBy: input.winBy,
     scoreA: input.scoreA,
     scoreB: input.scoreB,
     rated: input.rated,
@@ -198,7 +201,7 @@ export function previewMatch(ex: Executor, rawInput: unknown, opts: { matchId?: 
     next.results.slice(0, index).filter((r) => r.rated && r.playerIds.includes(pid)).length;
   const outOfRange = new Set(next.outOfRange.map((o) => o.playerId));
 
-  const prediction = predictMatch(res.pre, input.formatTarget, config);
+  const prediction = predictMatch(res.pre, input.formatTarget, config, input.winBy);
   const previewPlayers: PreviewPlayer[] = res.playerIds.map((id, i) => ({
     id,
     name: prepared.names.get(id)!,
@@ -216,6 +219,7 @@ export function previewMatch(ex: Executor, rawInput: unknown, opts: { matchId?: 
     playedAt: prepared.playedAt,
     timezone: config.timezone,
     formatTarget: input.formatTarget,
+    winBy: input.winBy,
     rated: input.rated,
     prediction,
     players: previewPlayers,
@@ -245,11 +249,11 @@ interface WriteOptions {
   now?: Date;
 }
 
-function recordSnapshot(tx: Executor, matchId: string, result: ReplayMatchResult, target: GameTarget, config: RatingConfig, now: Date) {
+function recordSnapshot(tx: Executor, matchId: string, result: ReplayMatchResult, target: GameTarget, winBy: WinBy, config: RatingConfig, now: Date) {
   tx.insert(predictionSnapshots)
     .values({
       matchId,
-      inputJson: { playerIds: result.playerIds, ratings: result.pre, formatTarget: target, beta: config.beta, algorithmVersion: config.algorithmVersion },
+      inputJson: { playerIds: result.playerIds, ratings: result.pre, formatTarget: target, winBy, beta: config.beta, algorithmVersion: config.algorithmVersion },
       probabilityA: result.winProbA,
       createdAt: now,
     })
@@ -287,6 +291,7 @@ export function confirmNewMatch(db: Db, actorId: string, rawInput: unknown, opts
           createdAt: now,
           updatedAt: now,
           formatTarget: input.formatTarget,
+          winBy: input.winBy,
           scoreA: input.scoreA,
           scoreB: input.scoreB,
           status: "confirmed",
@@ -302,7 +307,7 @@ export function confirmNewMatch(db: Db, actorId: string, rawInput: unknown, opts
       writeSlots(tx, id, prepared.ids);
       const rebuilt = rebuildRatings(tx);
       const result = rebuilt.results.find((r) => r.matchId === id)!;
-      recordSnapshot(tx, id, result, input.formatTarget, config, now);
+      recordSnapshot(tx, id, result, input.formatTarget, input.winBy, config, now);
       writeAudit(tx, {
         actorId,
         entityType: "match",
@@ -342,6 +347,7 @@ export function saveDraft(db: Db, actorId: string, rawInput: unknown, opts: { ma
             playedAt: new Date(prepared.playedAt),
             updatedAt: now,
             formatTarget: input.formatTarget,
+            winBy: input.winBy,
             scoreA: input.scoreA,
             scoreB: input.scoreB,
             rated: input.rated,
@@ -367,6 +373,7 @@ export function saveDraft(db: Db, actorId: string, rawInput: unknown, opts: { ma
           createdAt: now,
           updatedAt: now,
           formatTarget: input.formatTarget,
+          winBy: input.winBy,
           scoreA: input.scoreA,
           scoreB: input.scoreB,
           status: "draft",
@@ -414,6 +421,7 @@ export function confirmDraft(
           playedAt: new Date(prepared.playedAt),
           updatedAt: now,
           formatTarget: input.formatTarget,
+          winBy: input.winBy,
           scoreA: input.scoreA,
           scoreB: input.scoreB,
           rated: input.rated,
@@ -429,7 +437,7 @@ export function confirmDraft(
       writeSlots(tx, matchId, prepared.ids);
       const rebuilt = rebuildRatings(tx);
       const result = rebuilt.results.find((r) => r.matchId === matchId)!;
-      recordSnapshot(tx, matchId, result, input.formatTarget, config, now);
+      recordSnapshot(tx, matchId, result, input.formatTarget, input.winBy, config, now);
       writeAudit(tx, {
         actorId,
         entityType: "match",
@@ -452,6 +460,7 @@ function describeMatch(ex: Executor, m: MatchRow) {
     playedAt: m.playedAt.getTime(),
     playedAtLocal: epochToLocalInput(m.playedAt.getTime(), parseRatingConfig(m.configSnapshot).timezone),
     formatTarget: m.formatTarget,
+    winBy: m.winBy,
     scoreA: m.scoreA,
     scoreB: m.scoreB,
     rated: m.rated,
@@ -492,6 +501,7 @@ export function correctMatch(
           playedAt: new Date(prepared.playedAt),
           updatedAt: now,
           formatTarget: input.formatTarget,
+          winBy: input.winBy,
           scoreA: input.scoreA,
           scoreB: input.scoreB,
           rated: input.rated,

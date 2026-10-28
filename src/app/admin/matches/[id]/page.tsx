@@ -61,6 +61,7 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
               teamB: [item.teamB[0]?.id ?? null, item.teamB[1]?.id ?? null],
               playedAtLocal: epochToLocalInput(row.playedAt.getTime(), tz),
               formatTarget: row.formatTarget as 11 | 15 | 21,
+              winBy: row.winBy as 1 | 2,
               scoreA: String(row.scoreA),
               scoreB: String(row.scoreB),
               rated: row.rated,

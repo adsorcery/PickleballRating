@@ -1,7 +1,7 @@
 import { and, asc, desc, eq, gte, inArray, lte, sql, type SQL } from "drizzle-orm";
 import type { Executor } from "@/lib/db/client";
 import { matches, matchPlayers, players, ratingHistory } from "@/lib/db/schema";
-import type { GameTarget } from "@/lib/rating/config";
+import type { GameTarget, WinBy } from "@/lib/rating/config";
 import { getActiveConfig } from "@/lib/services/config";
 
 export interface MatchSide {
@@ -14,6 +14,7 @@ export interface MatchListItem {
   id: string;
   playedAt: number;
   formatTarget: GameTarget;
+  winBy: WinBy;
   scoreA: number;
   scoreB: number;
   rated: boolean;
@@ -126,6 +127,7 @@ function hydrateMatches(ex: Executor, rows: (typeof matches.$inferSelect)[]): Ma
     id: m.id,
     playedAt: m.playedAt.getTime(),
     formatTarget: m.formatTarget as GameTarget,
+    winBy: m.winBy as WinBy,
     scoreA: m.scoreA,
     scoreB: m.scoreB,
     rated: m.rated,

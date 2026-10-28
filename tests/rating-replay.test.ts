@@ -14,6 +14,7 @@ function match(over: Partial<ReplayMatch> & Pick<ReplayMatch, "teamA" | "teamB">
     playedAt: T0 + seq * 60_000,
     createdAt: T0 + seq,
     formatTarget: 11,
+    winBy: 2,
     scoreA: 11,
     scoreB: 7,
     rated: true,
