@@ -73,3 +73,7 @@ export function formatDateTime(ms: number, timeZone: string): string {
 export function formatDate(ms: number, timeZone: string): string {
   return new Intl.DateTimeFormat("en-US", { timeZone, month: "short", day: "numeric", year: "numeric" }).format(new Date(ms));
 }
+
+export function nowLocalInput(timeZone: string): string {
+  return epochToLocalInput(Date.now(), timeZone);
+}

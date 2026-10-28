@@ -1,8 +1,9 @@
 export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
-  const { initialize } = await import("@/lib/init");
+  const { initialize, startBackgroundJobs } = await import("@/lib/init");
   try {
     await initialize();
+    await startBackgroundJobs();
   } catch (err) {
     console.error(
       JSON.stringify({ level: "error", msg: "startup initialisation failed", error: err instanceof Error ? err.stack : String(err) }),

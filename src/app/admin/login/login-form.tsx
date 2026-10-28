@@ -14,7 +14,7 @@ export function LoginForm() {
       {state.error && <Alert variant="destructive">{state.error}</Alert>}
       <div>
         <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" autoComplete="username" required />
+        <Input id="email" name="email" type="email" autoComplete="username" defaultValue={state.email} required />
       </div>
       <div>
         <Label htmlFor="password">Password</Label>

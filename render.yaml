@@ -1,0 +1,42 @@
+# Render Blueprint. Requires a PAID web service (persistent disks are not available on free).
+# Single instance only: SQLite lives on the attached disk, so do not scale horizontally.
+services:
+  - type: web
+    name: viet-cinco
+    runtime: node
+    plan: starter
+    region: oregon
+    numInstances: 1
+    # The build and pre-deploy steps cannot see /var/data, so migrations run at runtime startup instead.
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    disk:
+      name: viet-cinco-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: 24
+      - key: DATABASE_PATH
+        value: /var/data/viet-cinco.sqlite
+      - key: APP_TIMEZONE
+        value: America/Los_Angeles
+      - key: BACKUP_INTERVAL_HOURS
+        value: 24
+      - key: BACKUP_RETENTION_COUNT
+        value: 14
+      # Secrets: set these in the Render dashboard (never commit them).
+      - key: ADMIN_BOOTSTRAP_EMAIL
+        sync: false
+      - key: ADMIN_BOOTSTRAP_PASSWORD
+        sync: false
+      - key: BACKUP_S3_BUCKET
+        sync: false
+      - key: BACKUP_S3_ENDPOINT
+        sync: false
+      - key: BACKUP_S3_ACCESS_KEY_ID
+        sync: false
+      - key: BACKUP_S3_SECRET_ACCESS_KEY
+        sync: false

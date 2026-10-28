@@ -34,6 +34,13 @@
   --ring: #0b5d3b;
 }
 
+@layer base {
+  /* Let single-column grid tracks shrink so long names never force horizontal page scroll. */
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 html {
   -webkit-text-size-adjust: 100%;
 }

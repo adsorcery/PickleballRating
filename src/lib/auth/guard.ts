@@ -26,7 +26,8 @@ export async function requireAdminPage(): Promise<AdminUser> {
 
 export async function clientIp(): Promise<string> {
   const h = await headers();
-  const forwarded = h.get("x-forwarded-for")?.split(",")[0]?.trim();
+  // The right-most entry is the one appended by our trusted proxy; earlier entries are client-controlled.
+  const forwarded = h.get("x-forwarded-for")?.split(",").at(-1)?.trim();
   return forwarded || h.get("x-real-ip") || "unknown";
 }
 

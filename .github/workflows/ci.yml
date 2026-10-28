@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - name: Schema migrations are in sync with schema.ts
+        run: |
+          npx drizzle-kit generate --name ci-drift-check
+          if [ -n "$(git status --porcelain drizzle)" ]; then
+            echo "schema.ts has changes without a committed migration"; git status --porcelain drizzle; exit 1
+          fi
+      - run: npm test
+      - run: npm run build

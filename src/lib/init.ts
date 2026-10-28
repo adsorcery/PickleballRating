@@ -30,3 +30,9 @@ export async function initialize(opened: OpenedDatabase = getDatabase()) {
     log("bootstrap admin created", { email: env.ADMIN_BOOTSTRAP_EMAIL });
   }
 }
+
+/** Runtime-only extras (not used by CLI scripts). */
+export async function startBackgroundJobs() {
+  const { startBackupScheduler } = await import("@/lib/backup");
+  startBackupScheduler();
+}
