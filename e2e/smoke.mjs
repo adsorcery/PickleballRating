@@ -103,7 +103,7 @@ assert.match(await row.innerText(), /Provisional/);
 assert.match(await row.innerText(), /1–0/);
 const rating = parseFloat((await row.locator("td").nth(2).innerText()).trim());
 console.log("newbie rating after win", rating);
-assert.ok(rating > 3.1, "winner's rating should rise from 3.100");
+assert.ok(rating >= 3.1, "winner's rating should not fall below its 3.10 start");
 await row.getByRole("link", { name: NEWBIE }).click();
 await page.getByRole("heading", { name: NEWBIE }).waitFor();
 await shot("profile");
@@ -124,6 +124,14 @@ await page.getByRole("spinbutton", { name: "Team B score" }).fill("4");
 await ctx.clearCookies();
 await page.getByRole("button", { name: "Preview changes" }).click();
 await page.getByText("You are not authorized to do that.").waitFor();
+
+// ---- every rating is shown with exactly 2 decimals on the main pages
+for (const path of ["/", "/predict", "/players", "/matches"]) {
+  await page.goto(BASE + path);
+  const text = await page.locator("main").innerText();
+  const bad = text.match(/\b\d\.\d{3,}\b/g);
+  assert.equal(bad, null, `${path} shows >2 decimals: ${bad}`);
+}
 
 await browser.close();
 const real = errors.filter((e) => !/401|Failed to load resource/.test(e));

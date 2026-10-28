@@ -9,7 +9,7 @@ import { TBody, TD, TH, THead, Table, TR } from "@/components/ui/table";
 import { getTimezone } from "@/lib/app-config";
 import { getDb } from "@/lib/db/client";
 import { getLeaderboard, getRecentMatches } from "@/lib/queries";
-import { formatRating } from "@/lib/utils";
+import { formatCincoRating } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -74,7 +74,7 @@ export default function LeaderboardPage() {
                         {p.wins}–{p.losses}
                       </span>
                     </TD>
-                    <TD className="tabular text-right text-base font-extrabold">{formatRating(p.rating)}</TD>
+                    <TD className="tabular text-right text-base font-extrabold">{formatCincoRating(p.rating)}</TD>
                     <TD className="hidden text-right sm:table-cell">
                       <Trend value={p.trend7} />
                     </TD>

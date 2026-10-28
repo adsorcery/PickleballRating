@@ -33,7 +33,7 @@ Write queries as server-side read-only operations; **authorize every mutation on
 
 ## 3. Mathematical rating model (VCPR v1)
 
-All calculations use unrounded floating-point intermediate values. Display 3 decimals; persist >= 6 decimals. Tests must use numerical tolerances.
+All calculations use unrounded floating-point intermediate values. Display exactly 2 decimals (via `formatCincoRating()` in `src/lib/format.ts`; presentation only); persist >= 6 decimals and always calculate with full precision. Tests must use numerical tolerances.
 
 ### Team ratings and scoring share
 
@@ -82,7 +82,7 @@ Given each rally independently won by Team A with probability `p`, estimate prob
 
 ## 4. Player management
 
-Create form: display name (required), initial Cinco Point (required, decimal, suggested 2.000–6.000), optional DUPR, optional avatar, optional notes. Persist `initial_cinco_rating` and `current_cinco_rating` separately. On create, set current = initial and matches played = 0; mark provisional. Name edits should not touch ratings. For players with confirmed history, changes to `initial_cinco_rating` require an explicit admin confirmation, reason, audit record and full replay; show affected-match count. Never hard-delete historical participants. Provide CSV preview, validation and duplicate detection before bulk importing.
+Create form: display name (required), initial Cinco Point (required, decimal, suggested 2.00–6.00), optional DUPR, optional avatar, optional notes. Persist `initial_cinco_rating` and `current_cinco_rating` separately. On create, set current = initial and matches played = 0; mark provisional. Name edits should not touch ratings. For players with confirmed history, changes to `initial_cinco_rating` require an explicit admin confirmation, reason, audit record and full replay; show affected-match count. Never hard-delete historical participants. Provide CSV preview, validation and duplicate detection before bulk importing.
 
 ## 5. Match submission and score validation
 

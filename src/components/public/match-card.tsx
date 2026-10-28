@@ -2,7 +2,8 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import type { MatchListItem, MatchSide } from "@/lib/queries";
 import { formatDateTime } from "@/lib/time";
-import { cn, formatDelta } from "@/lib/utils";
+import { displaysAsZero, formatCincoDelta } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 function TeamRow({ players, score, won, showDeltas }: { players: MatchSide[]; score: number; won: boolean; showDeltas: boolean }) {
   return (
@@ -13,8 +14,8 @@ function TeamRow({ players, score, won, showDeltas }: { players: MatchSide[]; sc
             <Link href={`/players/${p.id}`} className="min-w-0 truncate hover:underline">
               {p.name}
             </Link>
-            {showDeltas && p.delta != null && p.delta !== 0 && (
-              <span className={cn("tabular shrink-0 text-xs font-semibold", p.delta > 0 ? "text-emerald-700" : "text-red-700")}>{formatDelta(p.delta)}</span>
+            {showDeltas && p.delta != null && !displaysAsZero(p.delta) && (
+              <span className={cn("tabular shrink-0 text-xs font-semibold", p.delta > 0 ? "text-emerald-700" : "text-red-700")}>{formatCincoDelta(p.delta)}</span>
             )}
           </li>
         ))}

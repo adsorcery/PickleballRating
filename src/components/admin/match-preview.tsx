@@ -3,7 +3,8 @@ import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import type { MatchPreview } from "@/lib/services/matches";
 import { formatDateTime } from "@/lib/time";
-import { cn, formatDelta, formatPercent, formatRating } from "@/lib/utils";
+import { displaysAsZero, formatCincoDelta, formatCincoRating } from "@/lib/format";
+import { cn, formatPercent } from "@/lib/utils";
 
 export function MatchPreviewPanel({ preview, scoreA, scoreB }: { preview: MatchPreview; scoreA: number; scoreB: number }) {
   const { prediction: p } = preview;
@@ -29,7 +30,7 @@ export function MatchPreviewPanel({ preview, scoreA, scoreB }: { preview: MatchP
             <p className="font-extrabold">
               {t.label} · final score <span className="tabular">{t.score}</span>
             </p>
-            <p className="tabular mt-1">Pre-match average {formatRating(t.rating)}</p>
+            <p className="tabular mt-1">Pre-match average {formatCincoRating(t.rating)}</p>
             <p className="tabular">Expected point share {formatPercent(t.share)}</p>
             <p className="tabular">Chance to win game {formatPercent(t.win)}</p>
           </div>
@@ -63,9 +64,9 @@ export function MatchPreviewPanel({ preview, scoreA, scoreB }: { preview: MatchP
                     </Badge>
                   )}
                 </td>
-                <td className="tabular px-2 py-2 text-right">{formatRating(x.pre)}</td>
-                <td className={cn("tabular px-2 py-2 text-right font-bold", x.delta > 0 && "text-emerald-700", x.delta < 0 && "text-red-700")}>{formatDelta(x.delta)}</td>
-                <td className="tabular px-2 py-2 text-right font-bold">{formatRating(x.post)}</td>
+                <td className="tabular px-2 py-2 text-right">{formatCincoRating(x.pre)}</td>
+                <td className={cn("tabular px-2 py-2 text-right font-bold", !displaysAsZero(x.delta) && (x.delta > 0 ? "text-emerald-700" : "text-red-700"))}>{formatCincoDelta(x.delta)}</td>
+                <td className="tabular px-2 py-2 text-right font-bold">{formatCincoRating(x.post)}</td>
                 <td className="tabular px-2 py-2 text-right" title={`${x.priorGames} rated games in the trailing window`}>
                   ×{x.weight.toFixed(2)}
                 </td>
@@ -77,7 +78,7 @@ export function MatchPreviewPanel({ preview, scoreA, scoreB }: { preview: MatchP
 
       <ul className="space-y-1 text-sm text-muted-foreground">
         <li>
-          Team-average shift: <strong className="tabular text-foreground">{formatDelta(preview.teamDelta)}</strong> (capped at ±{preview.maximumTeamDelta.toFixed(2)} per team
+          Team-average shift: <strong className="tabular text-foreground">{formatCincoDelta(preview.teamDelta)}</strong> (capped at ±{preview.maximumTeamDelta.toFixed(2)} per team
           average{preview.teamDeltaCapped ? " — cap applied" : ""}). Individual changes can be larger or smaller because provisional players move more; the four changes always sum to zero.
         </li>
         <li>

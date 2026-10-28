@@ -50,6 +50,7 @@ All settings are environment variables, validated by Zod at first use (`src/lib/
 
 - **Public** (no login): `/` leaderboard, `/predict`, `/players`, `/players/[id]`, `/matches`.
 - **Admin** (`/admin/*`): players and CSV import, match entry with preview, correction or void, settings, export and backups.
+- **Display precision:** Cinco Points and rating changes are shown with exactly 2 decimals (`3.229473` → `3.23`) through `formatCincoRating()` / `formatCincoDelta()` in `src/lib/format.ts`. This is presentation only: SQLite keeps full-precision values, every calculation (ratings, win probabilities, replay) uses them unrounded, and the admin JSON/CSV exports contain the raw stored values. Changing it needs no migration.
 - **Rating engine** lives in pure TypeScript at `src/lib/rating/` (no UI or DB imports). The predictor page, server preview, and replay all call the same functions.
   - Expected point share `p = 1/(1+exp(-β(RA−RB)))`. The team-average shift is `clamp(K_eff·(s−p), ±0.08)`. It is split across the pair by reliability weight and is zero-sum.
   - Win probability is an exact dynamic program over rally states (win-by-2, closed form at deuce). **Point share is not win probability**, and the UI says so. No projected final score is shown in v1.

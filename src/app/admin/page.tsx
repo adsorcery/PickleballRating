@@ -9,7 +9,7 @@ import { getTimezone } from "@/lib/app-config";
 import { requireAdminPage } from "@/lib/auth/guard";
 import { getDb } from "@/lib/db/client";
 import { getAdminOverview } from "@/lib/queries";
-import { formatRating } from "@/lib/utils";
+import { formatCincoRating } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Admin" };
@@ -47,7 +47,7 @@ export default async function AdminHome() {
           <strong>Review needed:</strong> ratings outside the normal 2–6 scale (not clipped):{" "}
           {o.outOfRange.map((p) => (
             <Link key={p.id} href={`/players/${p.id}`} className="mr-2 font-semibold underline">
-              {p.name} ({formatRating(p.rating)})
+              {p.name} ({formatCincoRating(p.rating)})
             </Link>
           ))}
         </Alert>

@@ -7,7 +7,7 @@ import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { getTimezone } from "@/lib/app-config";
 import { getDb } from "@/lib/db/client";
 import { getPlayerProfile } from "@/lib/queries";
-import { formatRating } from "@/lib/utils";
+import { formatCincoRating } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -44,8 +44,8 @@ export default async function PlayerPage({ params }: { params: Promise<{ id: str
 
       <section aria-label="Ratings" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          ["Current Cinco", formatRating(p.currentRating)],
-          ["Initial Cinco", formatRating(p.initialRating)],
+          ["Current Cinco", formatCincoRating(p.currentRating)],
+          ["Initial Cinco", formatCincoRating(p.initialRating)],
           ["Record", `${p.wins}–${p.losses}`],
           ["Games", String(p.games)],
         ].map(([label, value]) => (

@@ -19,7 +19,7 @@ import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { ActionResult } from "@/lib/result";
 import type { ImportPreview, InitialRatingImpact } from "@/lib/services/players";
-import { formatRating } from "@/lib/utils";
+import { formatCincoRating } from "@/lib/format";
 
 type Notice = { kind: "success" | "destructive" | "warning"; text: string } | null;
 
@@ -78,7 +78,7 @@ export function CreatePlayerForm() {
     <Card className="space-y-4">
       <div>
         <CardTitle>Add a player</CardTitle>
-        <CardDescription>The initial Cinco Point is an estimate; suggested range 2.000–6.000. New players start as provisional.</CardDescription>
+        <CardDescription>The initial Cinco Point is an estimate; suggested range 2.00–6.00. New players start as provisional.</CardDescription>
       </div>
       <NoticeView notice={notice} />
       <form ref={formRef} action={submit} className="grid gap-4 sm:grid-cols-2">
@@ -213,7 +213,7 @@ export function CsvImport() {
                 <tr key={r.line} className="border-t border-border">
                   <td className="px-2 py-1">{r.line}</td>
                   <td className="px-2 py-1">{r.displayName || "—"}</td>
-                  <td className="tabular px-2 py-1">{formatRating(r.initialRating)}</td>
+                  <td className="tabular px-2 py-1">{formatCincoRating(r.initialRating)}</td>
                   <td className="px-2 py-1">
                     <Badge variant={r.status === "ok" ? "success" : "destructive"}>{STATUS_LABEL[r.status]}</Badge>
                     {r.message && <span className="ml-2 text-xs text-muted-foreground">{r.message}</span>}
@@ -245,13 +245,16 @@ export function PlayerEditor({ player }: { player: AdminPlayerRow }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [notice, setNotice] = useState<Notice>(null);
-  const [rating, setRating] = useState(String(player.initialRating));
+  // The field shows the 2-decimal display value. Only a value the admin actually types that differs
+  // from what is displayed counts as a change, so the stored full-precision rating is never rewritten by accident.
+  const displayedInitial = formatCincoRating(player.initialRating);
+  const [rating, setRating] = useState(displayedInitial);
   const [reason, setReason] = useState("");
   const [confirm, setConfirm] = useState(false);
   const [impact, setImpact] = useState<InitialRatingImpact | null>(null);
 
   const ratingValue = Number(rating);
-  const ratingChanged = rating.trim() !== "" && Number.isFinite(ratingValue) && ratingValue !== player.initialRating;
+  const ratingChanged = rating.trim() !== displayedInitial && rating.trim() !== "" && Number.isFinite(ratingValue);
 
   function saveDetails(fd: FormData) {
     start(async () => {
@@ -319,8 +322,8 @@ export function PlayerEditor({ player }: { player: AdminPlayerRow }) {
           </span>
         </span>
         <span className="tabular text-right text-sm">
-          <span className="block font-extrabold">{formatRating(player.currentRating)}</span>
-          <span className="text-xs text-muted-foreground">initial {formatRating(player.initialRating)}</span>
+          <span className="block font-extrabold">{formatCincoRating(player.currentRating)}</span>
+          <span className="text-xs text-muted-foreground">initial {formatCincoRating(player.initialRating)}</span>
         </span>
       </summary>
       <div className="space-y-5 border-t border-border p-4">
@@ -368,7 +371,7 @@ export function PlayerEditor({ player }: { player: AdminPlayerRow }) {
           {impact && (
             <Alert variant="warning">
               Affects <strong>{impact.affectedMatches}</strong> of this player&apos;s {impact.confirmedGames} confirmed match(es) and later matches involving others. Their
-              current rating would change from {formatRating(impact.currentBefore)} to {formatRating(impact.currentAfter)}.
+              current rating would change from {formatCincoRating(impact.currentBefore)} to {formatCincoRating(impact.currentAfter)}.
             </Alert>
           )}
           {ratingChanged && hasHistory && (

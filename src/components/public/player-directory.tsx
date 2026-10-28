@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { PlayerDirectoryRow } from "@/lib/queries";
-import { formatRating } from "@/lib/utils";
+import { formatCincoRating } from "@/lib/format";
 
 export function PlayerDirectory({ rows }: { rows: PlayerDirectoryRow[] }) {
   const [q, setQ] = useState("");
@@ -31,7 +31,7 @@ export function PlayerDirectory({ rows }: { rows: PlayerDirectoryRow[] }) {
                     {p.provisional && <Badge variant="warning">Provisional</Badge>}
                   </span>
                 </span>
-                <span className="tabular text-lg font-extrabold">{formatRating(p.rating)}</span>
+                <span className="tabular text-lg font-extrabold">{formatCincoRating(p.rating)}</span>
               </Link>
             </li>
           ))}

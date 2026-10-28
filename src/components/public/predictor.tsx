@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { predictMatch } from "@/lib/rating/predictor";
-import { cn, formatPercent, formatProbability, formatRating } from "@/lib/utils";
+import { formatCincoRating } from "@/lib/format";
+import { cn, formatPercent, formatProbability } from "@/lib/utils";
 
 const TARGETS = [11, 15, 21] as const;
 type Target = (typeof TARGETS)[number];
@@ -121,11 +122,11 @@ export function Predictor({ players, beta }: { players: PickerPlayer[]; beta: nu
               <dl className="grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded-xl bg-muted p-3">
                   <dt className="text-xs font-semibold text-muted-foreground">Team A average</dt>
-                  <dd className="tabular text-lg font-bold">{formatRating(prediction.teamARating)}</dd>
+                  <dd className="tabular text-lg font-bold">{formatCincoRating(prediction.teamARating)}</dd>
                 </div>
                 <div className="rounded-xl bg-muted p-3">
                   <dt className="text-xs font-semibold text-muted-foreground">Team B average</dt>
-                  <dd className="tabular text-lg font-bold">{formatRating(prediction.teamBRating)}</dd>
+                  <dd className="tabular text-lg font-bold">{formatCincoRating(prediction.teamBRating)}</dd>
                 </div>
                 <div className="rounded-xl bg-muted p-3">
                   <dt className="text-xs font-semibold text-muted-foreground">Expected point share A</dt>

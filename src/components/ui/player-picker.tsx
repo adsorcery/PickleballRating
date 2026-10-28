@@ -2,7 +2,8 @@
 
 import { useId, useMemo, useRef, useState } from "react";
 import { ChevronDown, X } from "lucide-react";
-import { cn, formatRating } from "@/lib/utils";
+import { formatCincoRating } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 export interface PickerPlayer {
   id: string;
@@ -79,7 +80,7 @@ export function PlayerPicker({ label, players, value, onChange, excludeIds, inva
             "block min-h-12 w-full rounded-lg border bg-card px-3 py-2 pr-16 text-base",
             invalid ? "border-destructive" : "border-border",
           )}
-          value={open || !selected ? query : `${selected.name} · ${formatRating(selected.rating)}`}
+          value={open || !selected ? query : `${selected.name} · ${formatCincoRating(selected.rating)}`}
           onChange={(e) => {
             setQuery(e.target.value);
             setOpen(true);
@@ -138,7 +139,7 @@ export function PlayerPicker({ label, players, value, onChange, excludeIds, inva
             >
               <span className="font-semibold">{p.name}</span>
               <span className="tabular text-muted-foreground">
-                {formatRating(p.rating)}
+                {formatCincoRating(p.rating)}
                 {p.provisional ? " · provisional" : ""}
               </span>
             </li>
