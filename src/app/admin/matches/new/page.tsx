@@ -1,4 +1,5 @@
 import { AdminNav } from "@/components/admin/admin-nav";
+import { RoastOnly, T } from "@/components/t";
 import { MatchForm } from "@/components/admin/match-form";
 import { getTimezone } from "@/lib/app-config";
 import { requireAdminPage } from "@/lib/auth/guard";
@@ -19,7 +20,14 @@ export default async function NewMatchPage() {
     <div className="space-y-6">
       <AdminNav email={admin.email} />
       <header>
-        <h1 className="text-2xl font-extrabold">Enter a doubles match</h1>
+        <h1 className="text-2xl font-extrabold">
+          <T k="match.title" />
+        </h1>
+        <RoastOnly>
+          <p className="text-sm font-semibold" lang="vi">
+            <T k="match.subtitle" />
+          </p>
+        </RoastOnly>
         <p className="text-sm text-muted-foreground">Times are in {tz}. Preview the rating changes, then confirm. Nothing is saved to the ratings until you confirm.</p>
       </header>
       {players.length < 4 ? (

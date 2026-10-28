@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdminNav } from "@/components/admin/admin-nav";
+import { T, TPlain } from "@/components/t";
 import { AuditTrail } from "@/components/admin/audit-trail";
 import { MatchForm } from "@/components/admin/match-form";
 import { VoidPanel } from "@/components/admin/void-panel";
@@ -37,7 +38,15 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
       <AdminNav email={admin.email} />
       <header className="flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-extrabold">Match</h1>
-        <Badge variant={row.status === "confirmed" ? "success" : row.status === "draft" ? "warning" : "destructive"}>{row.status}</Badge>
+        <Badge variant={row.status === "confirmed" ? "success" : row.status === "draft" ? "warning" : "destructive"} className="whitespace-normal">
+          {row.status === "confirmed" ? (
+            <TPlain k="match.confirmed" plain="confirmed" />
+          ) : row.status === "draft" ? (
+            <TPlain k="match.pending" plain="draft" />
+          ) : (
+            <TPlain k="match.void" plain="void" />
+          )}
+        </Badge>
         <Link href="/admin" className="ml-auto text-sm font-semibold text-primary hover:underline">
           Back to overview
         </Link>
@@ -45,7 +54,7 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
       <MatchCard match={item} timezone={tz} />
       {editable ? (
         <>
-          <h2 className="text-lg font-bold">{row.status === "draft" ? "Edit draft" : "Correct result"}</h2>
+          <h2 className="text-lg font-bold">{row.status === "draft" ? "Edit draft" : <T k="match.edit" en="Correct result" />}</h2>
           {row.status === "confirmed" && (
             <p className="text-sm text-muted-foreground">
               Corrections replay every confirmed match in order using each match&apos;s stored settings (algorithm {row.algorithmVersion}). A reason is required.

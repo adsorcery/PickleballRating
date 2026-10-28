@@ -2,6 +2,8 @@ import { and, asc, desc, eq, gte, inArray, lte, sql, type SQL } from "drizzle-or
 import type { Executor } from "@/lib/db/client";
 import { matches, matchPlayers, players, ratingHistory } from "@/lib/db/schema";
 import type { GameTarget, WinBy } from "@/lib/rating/config";
+import { classifyChemistry, currentStreak, type Streak } from "@/lib/roast/classify-event";
+import { preWinProbFor } from "@/lib/roast/match-events";
 import { getActiveConfig } from "@/lib/services/config";
 
 export interface MatchSide {
@@ -36,6 +38,8 @@ export interface LeaderboardRow {
   provisional: boolean;
   trend7: number | null;
   trend30: number | null;
+  /** Current run of consecutive confirmed wins or losses (newest first); display only from 3 up. */
+  streak: Streak | null;
 }
 
 const DAY = 86_400_000;
@@ -73,6 +77,18 @@ export function getLeaderboard(ex: Executor, now = Date.now()): LeaderboardRow[]
     );
   const t7 = trend(7);
   const t30 = trend(30);
+  const outcomes = new Map<string, boolean[]>();
+  for (const r of ex
+    .select({ playerId: matchPlayers.playerId, team: matchPlayers.team, a: matches.scoreA, b: matches.scoreB })
+    .from(matchPlayers)
+    .innerJoin(matches, eq(matches.id, matchPlayers.matchId))
+    .where(eq(matches.status, "confirmed"))
+    .orderBy(desc(matches.playedAt), desc(matches.id))
+    .all()) {
+    const list = outcomes.get(r.playerId) ?? [];
+    list.push(r.team === "A" ? r.a > r.b : r.b > r.a);
+    outcomes.set(r.playerId, list);
+  }
 
   return ex
     .select()
@@ -96,6 +112,7 @@ export function getLeaderboard(ex: Executor, now = Date.now()): LeaderboardRow[]
         provisional: ratedGames < config.provisionalGames,
         trend7: t7.get(p.id) ?? null,
         trend30: t30.get(p.id) ?? null,
+        streak: currentStreak(outcomes.get(p.id) ?? []),
       };
     })
     .sort((a, b) => b.rating - a.rating || a.name.localeCompare(b.name));
@@ -243,6 +260,11 @@ export interface PartnerStat {
   name: string;
   games: number;
   wins: number;
+  /** Shared games that have a saved pre-match probability, with the wins that probability expected. */
+  adjustedGames: number;
+  adjustedWins: number;
+  expectedWins: number;
+  chemistry: "partner_chemistry_good" | "partner_chemistry_bad" | null;
 }
 
 export interface PlayerProfile {
@@ -259,6 +281,7 @@ export interface PlayerProfile {
   losses: number;
   provisional: boolean;
   provisionalGames: number;
+  streak: Streak | null;
   history: { playedAt: number; rating: number; matchId: string | null }[];
   recent: (MatchListItem & { myTeam: "A" | "B"; delta: number | null })[];
   partners: PartnerStat[];
@@ -318,9 +341,16 @@ export function getPlayerProfile(ex: Executor, id: string): PlayerProfile | null
       if (o.playerId === id) continue;
       const m = myMatch.get(o.matchId)!;
       if (o.team === m.team) {
-        const s = partners.get(o.playerId) ?? { id: o.playerId, name: o.name, games: 0, wins: 0 };
+        const s = partners.get(o.playerId) ?? { id: o.playerId, name: o.name, games: 0, wins: 0, adjustedGames: 0, adjustedWins: 0, expectedWins: 0, chemistry: null };
         s.games++;
-        if (won(m)) s.wins++;
+        const didWin = won(m);
+        if (didWin) s.wins++;
+        const pre = preWinProbFor(m.team, m.match.predictedWinProbA);
+        if (pre !== null) {
+          s.adjustedGames++;
+          s.expectedWins += pre;
+          if (didWin) s.adjustedWins++;
+        }
         partners.set(o.playerId, s);
       } else {
         opponents.add(o.playerId);
@@ -348,7 +378,10 @@ export function getPlayerProfile(ex: Executor, id: string): PlayerProfile | null
     provisionalGames: config.provisionalGames,
     history: chart,
     recent,
-    partners: [...partners.values()].sort((a, b) => b.games - a.games || a.name.localeCompare(b.name)).slice(0, 5),
+    streak: currentStreak(mine.map(won)),
+    partners: [...partners.values()]
+      .map((s) => ({ ...s, chemistry: classifyChemistry({ games: s.adjustedGames, wins: s.adjustedWins, expectedWins: s.expectedWins }) }))
+      .sort((a, b) => b.games - a.games || a.name.localeCompare(b.name)).slice(0, 5),
     distinctOpponents: mine.length >= MIN_GAMES_FOR_DIVERSITY ? opponents.size : null,
     possibleOpponents: Math.max(possibleOpponents, 0),
     rank: p.active && rankIndex >= 0 ? rankIndex + 1 : null,

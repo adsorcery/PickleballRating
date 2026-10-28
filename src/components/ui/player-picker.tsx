@@ -3,6 +3,7 @@
 import { useId, useMemo, useRef, useState } from "react";
 import { ChevronDown, X } from "lucide-react";
 import { formatCincoRating } from "@/lib/format";
+import { useT } from "@/i18n/use-locale";
 import { cn } from "@/lib/utils";
 
 export interface PickerPlayer {
@@ -25,6 +26,7 @@ interface Props {
 /** Accessible searchable combobox (ARIA 1.2 list autocomplete). */
 export function PlayerPicker({ label, players, value, onChange, excludeIds, invalid }: Props) {
   const uid = useId();
+  const t = useT();
   const listId = `${uid}-list`;
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -75,7 +77,7 @@ export function PlayerPicker({ label, players, value, onChange, excludeIds, inva
           aria-invalid={invalid || undefined}
           aria-activedescendant={open && options[active] ? `${uid}-opt-${options[active].id}` : undefined}
           autoComplete="off"
-          placeholder="Search players…"
+          placeholder={t("predictor.pickPlayer")}
           className={cn(
             "block min-h-12 w-full rounded-lg border bg-card px-3 py-2 pr-16 text-base",
             invalid ? "border-destructive" : "border-border",
@@ -140,7 +142,7 @@ export function PlayerPicker({ label, players, value, onChange, excludeIds, inva
               <span className="font-semibold">{p.name}</span>
               <span className="tabular text-muted-foreground">
                 {formatCincoRating(p.rating)}
-                {p.provisional ? " · provisional" : ""}
+                {p.provisional ? ` · ${t("leaderboard.provisional", "provisional").toLowerCase()}` : ""}
               </span>
             </li>
           ))}

@@ -40,3 +40,14 @@ export function formatCincoDelta(value: number | null | undefined): string {
   if (displaysAsZero(value)) return magnitude;
   return value > 0 ? `+${magnitude}` : `−${magnitude}`;
 }
+
+/**
+ * Like formatCincoDelta, but a real (non-zero) change that rounds to 0.00 is shown as "<0.01" with
+ * its sign so a small gain or drop is never presented as exactly zero. Used by the funny mode and
+ * share text, where a sentence about a gain or a drop sits next to the number.
+ */
+export function formatCincoDeltaPrecise(value: number | null | undefined): string {
+  if (isMissing(value)) return "—";
+  if (value !== 0 && displaysAsZero(value)) return value > 0 ? "+<0.01" : "−<0.01";
+  return formatCincoDelta(value);
+}

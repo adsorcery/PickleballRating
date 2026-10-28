@@ -37,3 +37,9 @@
 - `users.preferred_win_by` remembers each admin's choice (updated only when changing the rule on the new-match form).
 - Score validation, preview, confirmation, correction, replay and the predictor all take the rule (`src/lib/rating/validation.ts`, `predictor.ts`); the predictor uses the same `WinBySelector` component and constants as match entry. The rating formula is unchanged.
 - Tests: exhaustive score oracle for every target × rule, closed-form win-by-1 probability, acceptance case (11–10 win by 1), legacy migration test proving stored matches, ratings and history are byte-identical and a replay changes nothing.
+
+## Chế Độ Mất Nết 18+ ✅
+- Opt-in Vietnamese adult-humor mode as a localization/personality layer: `src/i18n/` (typed catalogs, lazy loader, localStorage store, provider), `src/lib/roast/` (classifier, deterministic picker, accuracy guards, line builder), `src/components/roast/`, switcher in the header, one-time acknowledgement dialog (mounted only when requested).
+- Applied to the navbar, leaderboard (incl. streak column), predictor (verdict panel, balance button), match cards and history (old matches included), player profiles (status, streak, partner chemistry) and the admin forms. "Chửi Nữa Đi" cycles lines locally; the share button copies exact scores and rating changes.
+- No SQL migration and no writes: preference is device-local; stored data, ratings and exports are untouched. Read-only additions to queries: current streak and opponent-adjusted partner numbers.
+- Verified: unit/SSR tests in both modes; English pages (public and admin) diffed against the previous build; opt-in and persistence; DB hash identical after switching modes and roasting; 11–10 win-by-1 saved in funny mode; no horizontal overflow at 360px.

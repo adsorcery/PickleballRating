@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AdminNav } from "@/components/admin/admin-nav";
+import { T } from "@/components/t";
 import { MatchCard } from "@/components/public/match-card";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -23,9 +24,13 @@ export default async function AdminHome() {
     <div className="space-y-6">
       <AdminNav email={admin.email} />
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-extrabold">Admin overview</h1>
+        <h1 className="text-2xl font-extrabold">
+          <T k="nav.admin" en="Admin overview" />
+        </h1>
         <Button asChild>
-          <Link href="/admin/matches/new">Enter a match</Link>
+          <Link href="/admin/matches/new">
+            <T k="match.title" en="Enter a match" />
+          </Link>
         </Button>
       </div>
 
@@ -54,7 +59,9 @@ export default async function AdminHome() {
       )}
 
       <section className="space-y-3" aria-label="Pending drafts">
-        <h2 className="text-lg font-bold">Pending drafts</h2>
+        <h2 className="text-lg font-bold">
+          <T k="match.pending" />
+        </h2>
         {o.drafts.length === 0 ? (
           <p className="rounded-xl bg-muted p-4 text-sm text-muted-foreground">No drafts. Drafts never affect ratings.</p>
         ) : (
@@ -72,7 +79,9 @@ export default async function AdminHome() {
       </section>
 
       <section className="space-y-3" aria-label="Recent matches">
-        <h2 className="text-lg font-bold">Recent matches</h2>
+        <h2 className="text-lg font-bold">
+          <T k="nav.history" en="Recent matches" />
+        </h2>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {o.recent.map((m) => (
             <div key={m.id} className="space-y-1">

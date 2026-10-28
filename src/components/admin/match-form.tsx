@@ -20,6 +20,9 @@ import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PlayerPicker, type PickerPlayer } from "@/components/ui/player-picker";
 import { WinBySelector } from "@/components/ui/win-by-selector";
+import { useRoastEvents } from "@/components/roast/roast-line";
+import { useT, useTPlain } from "@/i18n/use-locale";
+import { pickMessage } from "@/lib/roast/pick-message";
 import type { WinBy } from "@/lib/rating/config";
 import type { MatchInput, MatchPreview } from "@/lib/services/matches";
 import { cn } from "@/lib/utils";
@@ -49,6 +52,9 @@ type Msg = { kind: "success" | "destructive" | "warning"; text: string; href?: s
 const newKey = () => crypto.randomUUID();
 
 export function MatchForm({ mode, players, initial, matchId, expectedUpdatedAt }: Props) {
+  const t = useT();
+  const tp = useTPlain();
+  const roastEvents = useRoastEvents();
   const router = useRouter();
   const [pending, start] = useTransition();
   const [sel, setSel] = useState<(string | null)[]>([...initial.teamA, ...initial.teamB]);
@@ -93,7 +99,9 @@ export function MatchForm({ mode, players, initial, matchId, expectedUpdatedAt }
 
   function fail(res: { error: string; code?: string; fieldErrors?: Record<string, string[]> }) {
     setFieldErrors(res.fieldErrors ?? {});
-    setMsg({ kind: res.code === "conflict" ? "warning" : "destructive", text: res.error });
+    // Unexpected failures get a light line in the funny mode; the exact English message always stays.
+    const joke = res.code === "internal" && roastEvents ? pickMessage(roastEvents.error_safe, `admin|${key}`, 0) : null;
+    setMsg({ kind: res.code === "conflict" ? "warning" : "destructive", text: joke ? `${joke} (${res.error})` : res.error });
   }
 
   function runPreview() {
@@ -121,7 +129,9 @@ export function MatchForm({ mode, players, initial, matchId, expectedUpdatedAt }
         if (!res.ok) return fail(res);
         setMsg({
           kind: "success",
-          text: res.data.alreadySaved ? "This match was already saved — nothing changed." : "Match confirmed. Ratings and history are updated.",
+          text: res.data.alreadySaved
+            ? "This match was already saved — nothing changed."
+            : tp("match.success", "Match confirmed. Ratings and history are updated."),
           href: `/admin/matches/${res.data.matchId}`,
         });
         setSel([null, null, null, null]);
@@ -179,12 +189,12 @@ export function MatchForm({ mode, players, initial, matchId, expectedUpdatedAt }
       <Card className="space-y-5">
         <div className="grid gap-5 md:grid-cols-2">
           <fieldset className="space-y-3">
-            <legend className="mb-1 text-sm font-extrabold uppercase tracking-wide text-primary">Team A</legend>
+            <legend className="mb-1 text-sm font-extrabold uppercase tracking-wide text-primary">{t("match.teamA")}</legend>
             <PlayerPicker label="Player 1" players={players} value={sel[0]} onChange={(id) => setSel((s) => s.map((v, i) => (i === 0 ? id : v)))} excludeIds={sel} invalid={!!err("players")} />
             <PlayerPicker label="Player 2" players={players} value={sel[1]} onChange={(id) => setSel((s) => s.map((v, i) => (i === 1 ? id : v)))} excludeIds={sel} invalid={!!err("players")} />
           </fieldset>
           <fieldset className="space-y-3">
-            <legend className="mb-1 text-sm font-extrabold uppercase tracking-wide text-primary">Team B</legend>
+            <legend className="mb-1 text-sm font-extrabold uppercase tracking-wide text-primary">{t("match.teamB")}</legend>
             <PlayerPicker label="Player 3" players={players} value={sel[2]} onChange={(id) => setSel((s) => s.map((v, i) => (i === 2 ? id : v)))} excludeIds={sel} invalid={!!err("players")} />
             <PlayerPicker label="Player 4" players={players} value={sel[3]} onChange={(id) => setSel((s) => s.map((v, i) => (i === 3 ? id : v)))} excludeIds={sel} invalid={!!err("players")} />
           </fieldset>
@@ -192,10 +202,11 @@ export function MatchForm({ mode, players, initial, matchId, expectedUpdatedAt }
         {err("players") && <p className="text-sm font-semibold text-destructive">{err("players")}</p>}
 
         <div className="grid gap-5 sm:grid-cols-2">
-          <ScoreInput label="Team A score" value={scoreA} onChange={setScoreA} />
-          <ScoreInput label="Team B score" value={scoreB} onChange={setScoreB} />
+          <ScoreInput label={t("match.teamA", "Team A score")} value={scoreA} onChange={setScoreA} />
+          <ScoreInput label={t("match.teamB", "Team B score")} value={scoreB} onChange={setScoreB} />
         </div>
         <WinBySelector
+          plainEnglish
           value={winBy}
           onChange={(w) => {
             setWinBy(w);
@@ -203,11 +214,11 @@ export function MatchForm({ mode, players, initial, matchId, expectedUpdatedAt }
             if (mode === "new") void setPreferredWinByAction({ winBy: w });
           }}
         />
-        {err("scoreA") && <p className="text-sm font-semibold text-destructive">{err("scoreA")}</p>}
+        {err("scoreA") && <p className="text-sm font-semibold text-destructive">{tp("match.invalidScore", err("scoreA")!)}</p>}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <fieldset>
-            <legend className="mb-1 text-sm font-semibold">Game format (play to)</legend>
+            <legend className="mb-1 text-sm font-semibold">{t("predictor.gameTo")}</legend>
             <div className="grid grid-cols-3 gap-2" role="radiogroup">
               {([11, 15, 21] as const).map((t) => (
                 <label
@@ -244,18 +255,18 @@ export function MatchForm({ mode, players, initial, matchId, expectedUpdatedAt }
 
         {mode === "correct" && (
           <div>
-            <Label htmlFor="reason">Reason for correction (required, audited)</Label>
+            <Label htmlFor="reason">{t("match.reason")}</Label>
             <Input id="reason" value={reason} onChange={(e) => setReason(e.target.value)} maxLength={500} />
           </div>
         )}
 
         <div className="flex flex-wrap gap-2">
           <Button type="button" variant="outline" onClick={runPreview} disabled={!input || pending}>
-            {pending && !current ? "Working…" : "Preview changes"}
+            {pending && !current ? "Working…" : t("match.preview")}
           </Button>
           {mode !== "correct" && (
             <Button type="button" variant="secondary" onClick={saveDraft} disabled={!input || pending}>
-              Save as draft
+              {tp("common.save", "Save as draft")}
             </Button>
           )}
         </div>
@@ -272,8 +283,8 @@ export function MatchForm({ mode, players, initial, matchId, expectedUpdatedAt }
             </label>
           )}
           <div className="sticky bottom-20 z-20 md:bottom-4">
-            <Button type="button" size="lg" className="w-full shadow-lg" onClick={confirm} disabled={!canConfirm}>
-              {pending ? "Saving…" : mode === "correct" ? "Save correction & recalculate" : "Confirm & save match"}
+            <Button type="button" size="lg" className="h-auto min-h-12 w-full whitespace-normal py-2 text-center shadow-lg" onClick={confirm} disabled={!canConfirm}>
+              {pending ? "Saving…" : mode === "correct" ? tp("match.confirm", "Save correction & recalculate") : tp("match.submit", "Confirm & save match")}
             </Button>
           </div>
         </>

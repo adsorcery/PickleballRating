@@ -19,7 +19,9 @@
     "db:backup": "tsx scripts/backup.ts",
     "db:restore-check": "tsx scripts/restore-check.ts",
     "e2e": "node e2e/smoke.mjs",
-    "e2e:layout": "node e2e/layout.mjs"
+    "e2e:layout": "node e2e/layout.mjs",
+    "e2e:roast": "node e2e/roast.mjs",
+    "e2e:parity": "node e2e/parity.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1158.0",

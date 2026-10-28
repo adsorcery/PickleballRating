@@ -3,11 +3,13 @@ import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import type { MatchPreview } from "@/lib/services/matches";
 import { formatDateTime } from "@/lib/time";
+import { useT } from "@/i18n/use-locale";
 import { winByLabel } from "@/lib/rating/config";
 import { displaysAsZero, formatCincoDelta, formatCincoRating } from "@/lib/format";
 import { cn, formatPercent } from "@/lib/utils";
 
 export function MatchPreviewPanel({ preview, scoreA, scoreB }: { preview: MatchPreview; scoreA: number; scoreB: number }) {
+  const t = useT();
   const { prediction: p } = preview;
   const teams = [
     { label: "Team A", rows: preview.players.filter((x) => x.team === "A"), rating: p.teamARating, share: p.pointShareA, win: p.winProbA, score: scoreA },
@@ -43,9 +45,9 @@ export function MatchPreviewPanel({ preview, scoreA, scoreB }: { preview: MatchP
           <thead>
             <tr className="text-xs uppercase text-muted-foreground">
               <th className="px-2 py-1">Player</th>
-              <th className="px-2 py-1 text-right">Before</th>
-              <th className="px-2 py-1 text-right">Change</th>
-              <th className="px-2 py-1 text-right">After</th>
+              <th className="px-2 py-1 text-right">{t("match.before")}</th>
+              <th className="px-2 py-1 text-right">{t("match.ratingChange")}</th>
+              <th className="px-2 py-1 text-right">{t("match.after")}</th>
               <th className="px-2 py-1 text-right">Weight</th>
             </tr>
           </thead>

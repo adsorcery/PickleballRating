@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { MatchCard } from "@/components/public/match-card";
+import { RoastLine } from "@/components/roast/roast-line";
+import { T } from "@/components/t";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/input";
@@ -55,7 +57,9 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-extrabold tracking-tight">Match history</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight">
+        <T k="nav.history" />
+      </h1>
       <Card>
         <form method="get" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6" aria-label="Filter matches">
           <div className="lg:col-span-2">
@@ -91,7 +95,9 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
             <Input id="to" name="to" type="date" defaultValue={toStr} />
           </div>
           <div className="flex gap-2 sm:col-span-2 lg:col-span-6">
-            <Button type="submit">Apply filters</Button>
+            <Button type="submit">
+              <T k="common.filter" />
+            </Button>
             <Button asChild variant="outline">
               <Link href="/matches">Reset</Link>
             </Button>
@@ -103,7 +109,10 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         {result.total} {result.total === 1 ? "match" : "matches"}
       </p>
       {result.items.length === 0 ? (
-        <p className="rounded-xl bg-muted p-4 text-sm text-muted-foreground">No matches found.</p>
+        <div className="space-y-2 rounded-xl bg-muted p-4 text-sm text-muted-foreground">
+          <p>No matches found.</p>
+          <RoastLine event="no_matches" seed={`matches|${q}|${playerId}|${format ?? ""}|${fromStr}|${toStr}`} />
+        </div>
       ) : (
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {result.items.map((m) => (
@@ -122,7 +131,9 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         <nav aria-label="Pagination" className="flex items-center justify-between">
           {page > 1 ? (
             <Button asChild variant="outline">
-              <Link href={linkFor(page - 1)}>Previous</Link>
+              <Link href={linkFor(page - 1)}>
+                <T k="common.back" />
+              </Link>
             </Button>
           ) : (
             <span />
@@ -132,7 +143,9 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
           </span>
           {page < pages ? (
             <Button asChild variant="outline">
-              <Link href={linkFor(page + 1)}>Next</Link>
+              <Link href={linkFor(page + 1)}>
+                <T k="common.next" />
+              </Link>
             </Button>
           ) : (
             <span />

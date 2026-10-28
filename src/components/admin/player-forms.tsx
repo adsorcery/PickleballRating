@@ -19,6 +19,7 @@ import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { ActionResult } from "@/lib/result";
 import type { ImportPreview, InitialRatingImpact } from "@/lib/services/players";
+import { useT, useTPlain } from "@/i18n/use-locale";
 import { formatCincoRating } from "@/lib/format";
 
 type Notice = { kind: "success" | "destructive" | "warning"; text: string } | null;
@@ -41,6 +42,7 @@ function FieldError({ id, message }: { id: string; message?: string }) {
 }
 
 export function CreatePlayerForm() {
+  const t = useT();
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const [pending, start] = useTransition();
@@ -77,23 +79,23 @@ export function CreatePlayerForm() {
   return (
     <Card className="space-y-4">
       <div>
-        <CardTitle>Add a player</CardTitle>
+        <CardTitle>{t("player.add")}</CardTitle>
         <CardDescription>The initial Cinco Point is an estimate; suggested range 2.00–6.00. New players start as provisional.</CardDescription>
       </div>
       <NoticeView notice={notice} />
       <form ref={formRef} action={submit} className="grid gap-4 sm:grid-cols-2">
         <div>
-          <Label htmlFor="cp-name">Display name *</Label>
+          <Label htmlFor="cp-name">{t("leaderboard.player", "Display name")} *</Label>
           <Input id="cp-name" name="displayName" required maxLength={60} aria-describedby="cp-name-err" />
           <FieldError id="cp-name-err" message={errors.displayName} />
         </div>
         <div>
-          <Label htmlFor="cp-rating">Initial Cinco Point *</Label>
+          <Label htmlFor="cp-rating">{t("player.newRating")} *</Label>
           <Input id="cp-rating" name="initialRating" required type="number" step="0.001" min="0" max="10" inputMode="decimal" aria-describedby="cp-rating-err" />
           <FieldError id="cp-rating-err" message={errors.initialRating} />
         </div>
         <div>
-          <Label htmlFor="cp-dupr">DUPR (optional, reference only)</Label>
+          <Label htmlFor="cp-dupr">{t("player.dupr")}</Label>
           <Input id="cp-dupr" name="duprRating" type="number" step="0.001" min="0" max="10" inputMode="decimal" />
           <FieldError id="cp-dupr-err" message={errors.duprRating} />
         </div>
@@ -108,7 +110,7 @@ export function CreatePlayerForm() {
         </div>
         <div className="sm:col-span-2">
           <Button type="submit" disabled={pending}>
-            {pending ? "Adding…" : "Add player"}
+            {pending ? "Adding…" : t("player.add", "Add player")}
           </Button>
         </div>
       </form>
@@ -242,6 +244,8 @@ export interface AdminPlayerRow {
 }
 
 export function PlayerEditor({ player }: { player: AdminPlayerRow }) {
+  const t = useT();
+  const tp = useTPlain();
   const router = useRouter();
   const [pending, start] = useTransition();
   const [notice, setNotice] = useState<Notice>(null);
@@ -317,7 +321,7 @@ export function PlayerEditor({ player }: { player: AdminPlayerRow }) {
         <span className="min-w-0">
           <span className="block truncate font-semibold">{player.displayName}</span>
           <span className="flex gap-1">
-            {!player.active && <Badge>Inactive</Badge>}
+            {!player.active && <Badge>{t("player.inactive")}</Badge>}
             <Badge variant="muted">{player.games} games</Badge>
           </span>
         </span>
@@ -334,7 +338,7 @@ export function PlayerEditor({ player }: { player: AdminPlayerRow }) {
             <Input id={`n-${player.id}`} name="displayName" defaultValue={player.displayName} required maxLength={60} />
           </div>
           <div>
-            <Label htmlFor={`d-${player.id}`}>DUPR (reference only)</Label>
+            <Label htmlFor={`d-${player.id}`}>{t("player.dupr", "DUPR (reference only)")}</Label>
             <Input id={`d-${player.id}`} name="duprRating" type="number" step="0.001" min="0" max="10" defaultValue={player.duprRating ?? ""} />
           </div>
           <div>
@@ -347,7 +351,7 @@ export function PlayerEditor({ player }: { player: AdminPlayerRow }) {
           </div>
           <div className="sm:col-span-2">
             <Button type="submit" disabled={pending}>
-              Save details
+              {t("player.save")}
             </Button>
           </div>
         </form>
@@ -395,8 +399,8 @@ export function PlayerEditor({ player }: { player: AdminPlayerRow }) {
           <p className="text-sm text-muted-foreground">
             {player.active ? "Deactivating hides the player from the leaderboard and new matches. History is kept." : "Inactive players are hidden from the leaderboard and predictor."}
           </p>
-          <Button type="button" variant={player.active ? "outline" : "default"} onClick={toggleActive} disabled={pending}>
-            {player.active ? "Deactivate" : "Reactivate"}
+          <Button type="button" variant={player.active ? "outline" : "default"} onClick={toggleActive} disabled={pending} className="h-auto min-h-11 whitespace-normal py-1.5 text-center">
+            {player.active ? tp("player.deactivate", "Deactivate") : "Reactivate"}
           </Button>
         </div>
       </div>

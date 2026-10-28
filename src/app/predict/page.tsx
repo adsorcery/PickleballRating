@@ -1,3 +1,4 @@
+import { T } from "@/components/t";
 import { Predictor } from "@/components/public/predictor";
 import { getDb } from "@/lib/db/client";
 import { listSelectablePlayers } from "@/lib/queries";
@@ -13,8 +14,12 @@ export default function PredictPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-3xl font-extrabold tracking-tight">Predict a Match</h1>
-        <p className="text-muted-foreground">Pick two teams to see each side&apos;s chance of winning a game.</p>
+        <h1 className="text-3xl font-extrabold tracking-tight">
+          <T k="predictor.title" />
+        </h1>
+        <p className="text-muted-foreground">
+          <T k="predictor.subtitle" en="Pick two teams to see each side's chance of winning a game." />
+        </p>
       </header>
       {players.length < 4 ? (
         <p className="rounded-xl bg-muted p-4 text-sm">At least four active players are needed before predictions are available.</p>

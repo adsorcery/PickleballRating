@@ -67,6 +67,20 @@ All settings are environment variables, validated by Zod at first use (`src/lib/
 - Sign-in is rate limited in the database (5 failures per 15 minutes per email and per client IP, then a 15-minute lockout). Unknown accounts take the same time as real ones.
 - CSRF is covered by `SameSite=Lax`, Next.js's built-in server-action origin check, and our explicit `Origin` check. Security headers are set in `next.config.ts`. Avatar URLs must be http(s), and CSV exports neutralise spreadsheet formulas.
 
+## Chế Độ Mất Nết 18+ (optional Vietnamese adult-humor mode)
+
+A **presentation-only** mode. It changes labels and adds jokes; it never touches stored data, ratings, probabilities, exports or the rating engine. Full requirements: [VIET_CINCO_ROAST_MODE_COPILOT.md](./VIET_CINCO_ROAST_MODE_COPILOT.md).
+
+- **Switching:** a compact `EN | 🔥 18+` switch sits in the header (desktop and phone). English is the default for first-time visitors. Choosing 🔥 18+ opens a one-time dialog; the mode turns on only after the visitor ticks *“Tôi trên 18 tuổi và muốn bật chế độ cà khịa”*. This is a content opt-in, not age verification. **“Trở Về Người Tử Tế”** (banner) or `EN` switches back in one click.
+- **Persistence:** the visitor's device only, in `localStorage` (`vietcinco:language`, `vietcinco:roast-ack`). Nothing is stored on the server or in SQLite, and nothing is written during SSR. The server and first client render are always English, then the saved choice is applied after hydration. Writing only the language key does not bypass the dialog.
+- **Content:** `src/i18n/vi-roast.ui.json` (107 UI strings) and `src/i18n/vi-roast.events.json` (255 lines in 27 buckets) are used unchanged. A few neutral extras the library lacks (the model caveat, “7 ngày”, “Đã chép!”) live in `src/i18n/vi-roast.extra.ts`. Anything without a Vietnamese string falls back to English; raw keys are never shown. `src/i18n/en.ts` is typed `Record<UiKey, string>`, so a key added to the JSON fails the build until English exists too.
+- **Lazy loading:** the Vietnamese strings and all jokes are dynamic-imported (`src/i18n/catalog.ts`) only after opt-in. English visitors never download them (verified in `e2e/roast.mjs`).
+- **How lines are chosen** (`src/lib/roast/`): `classify-event.ts` turns existing facts into event keys using the spec's thresholds (game win probability for predictions, the **saved pre-match** win probability for upsets, the stored precise rating delta, streaks of 3+, partner chemistry after 8+ shared matches against the saved expectations). `pick-message.ts` picks deterministically (FNV hash of match/team/event, so a reload is stable and SSR never disagrees); **Chửi Nữa Đi** advances to the next line, wraps, and makes no network request. No randomness, API or AI.
+- **Accuracy guards:** a few provided lines state a fact (“11–0!”, “Thua một điểm”). They are unchanged but only eligible when true for the described result. A plain win is only called “expected” when the saved prediction favoured the winner, and an upset is never claimed without a saved probability.
+- **Admin:** admin pages can use the funny labels, but approval and destructive actions show the plain English next to them (e.g. “Rút Lui Chiến Thuật (Sign out)”), and validation and audit text stays English.
+- **Not covered by the provided library** (stay English in both modes): filter-form field labels, summary tiles and settings pages, pagination page counts, status badges such as “Unrated”, and aria-labels of the +/- score buttons.
+- **Tests:** `tests/roast-*.test.ts(x)` (content integrity, classifier, picker, every target × rule × score, SSR output in both modes, localStorage store), plus browser checks: `npm run e2e:roast` (opt-in, persistence, lazy loading, no-network roasting, DB untouched, admin, 360px) and `npm run e2e:parity` (`A=<old url> B=<new url>`: English pages identical before and after).
+
 ## Database and migrations
 
 Schema: `src/lib/db/schema.ts` (Drizzle). Migrations: `drizzle/` (committed). Workflow:

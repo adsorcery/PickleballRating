@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/i18n/use-locale";
 import { formatCincoRating } from "@/lib/format";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
@@ -9,6 +10,7 @@ export interface ChartPoint {
 }
 
 export function RatingChart({ points, timezone }: { points: ChartPoint[]; timezone: string }) {
+  const t = useT();
   const fmt = new Intl.DateTimeFormat("en-US", { timeZone: timezone, month: "short", day: "numeric" });
   const ratings = points.map((p) => p.rating);
   const lo = Math.floor((Math.min(...ratings) - 0.1) * 10) / 10;
@@ -21,7 +23,7 @@ export function RatingChart({ points, timezone }: { points: ChartPoint[]; timezo
           <XAxis dataKey="t" type="number" scale="time" domain={["dataMin", "dataMax"]} tickFormatter={(t) => fmt.format(new Date(t))} tick={{ fontSize: 12 }} />
           <YAxis domain={[lo, hi]} tick={{ fontSize: 12 }} tickFormatter={(v) => formatCincoRating(Number(v))} width={48} />
           <Tooltip
-            formatter={(v) => [formatCincoRating(Number(v)), "Cinco"]}
+            formatter={(v) => [formatCincoRating(Number(v)), t("leaderboard.rating")]}
             labelFormatter={(t) => fmt.format(new Date(Number(t)))}
           />
           <Line type="monotone" dataKey="rating" stroke="#0b5d3b" strokeWidth={3} dot={{ r: 3 }} isAnimationActive={false} />

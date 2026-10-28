@@ -8,9 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useTPlain } from "@/i18n/use-locale";
 
 export function VoidPanel({ matchId, expectedUpdatedAt, isDraft }: { matchId: string; expectedUpdatedAt: number; isDraft: boolean }) {
   const router = useRouter();
+  const tp = useTPlain();
   const [pending, start] = useTransition();
   const [reason, setReason] = useState("");
   const [armed, setArmed] = useState(false);
@@ -28,7 +30,7 @@ export function VoidPanel({ matchId, expectedUpdatedAt, isDraft }: { matchId: st
     });
   }
 
-  const word = isDraft ? "Discard draft" : "Void match";
+  const word = isDraft ? "Discard draft" : tp("match.void", "Void match");
   return (
     <Card className="space-y-3 border-red-200">
       <div>
@@ -48,7 +50,7 @@ export function VoidPanel({ matchId, expectedUpdatedAt, isDraft }: { matchId: st
         <input type="checkbox" className="mt-1 size-5" checked={armed} onChange={(e) => setArmed(e.target.checked)} />
         <span>I understand this cannot be undone from the interface.</span>
       </label>
-      <Button type="button" variant="destructive" disabled={pending || !armed || reason.trim().length < 3} onClick={run}>
+      <Button type="button" variant="destructive" disabled={pending || !armed || reason.trim().length < 3} onClick={run} className="h-auto min-h-11 whitespace-normal py-1.5 text-center">
         {pending ? "Working…" : word}
       </Button>
     </Card>

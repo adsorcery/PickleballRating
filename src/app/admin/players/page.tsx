@@ -1,4 +1,5 @@
 import { AdminNav } from "@/components/admin/admin-nav";
+import { T } from "@/components/t";
 import { CreatePlayerForm, CsvImport, PlayerEditor, type AdminPlayerRow } from "@/components/admin/player-forms";
 import { requireAdminPage } from "@/lib/auth/guard";
 import { getDb } from "@/lib/db/client";
@@ -25,7 +26,9 @@ export default async function AdminPlayersPage() {
   return (
     <div className="space-y-6">
       <AdminNav email={admin.email} />
-      <h1 className="text-2xl font-extrabold">Players</h1>
+      <h1 className="text-2xl font-extrabold">
+        <T k="nav.players" />
+      </h1>
       <div className="grid gap-6 lg:grid-cols-2">
         <CreatePlayerForm />
         <CsvImport />
