@@ -70,6 +70,11 @@ export function LeaderboardView({ rows, recent }: LeaderboardViewProps) {
                         <Link href={`/players/${p.id}`} className="font-semibold hover:underline">
                           {p.name}
                         </Link>
+                        {p.duprRating && (
+                          <div className="text-xs text-muted-foreground">
+                            DUPR: {p.duprRating}
+                          </div>
+                        )}
                         {p.provisional && (
                           <Badge
                             variant="warning"

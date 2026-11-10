@@ -40,6 +40,7 @@ export interface LeaderboardRow {
   trend30: number | null;
   /** Current run of consecutive confirmed wins or losses (newest first); display only from 3 up. */
   streak: Streak | null;
+  duprRating: number | null;
 }
 
 const DAY = 86_400_000;
@@ -113,6 +114,7 @@ export function getLeaderboard(ex: Executor, now = Date.now()): LeaderboardRow[]
         trend7: t7.get(p.id) ?? null,
         trend30: t30.get(p.id) ?? null,
         streak: currentStreak(outcomes.get(p.id) ?? []),
+        duprRating: p.duprRating,
       };
     })
     .sort((a, b) => b.rating - a.rating || a.name.localeCompare(b.name));

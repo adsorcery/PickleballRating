@@ -55,7 +55,7 @@ const enUi: Record<UiKey, string> = {
   "match.teamA": "Team A",
   "match.teamB": "Team B",
   "match.submit": "Confirm & save match",
-  "match.preview": "Preview changes",
+  "match.preview": "Submit",
   "match.confirm": "Save correction & recalculate",
   "match.cancel": "Cancel",
   "match.success": "Match confirmed. Ratings and history are updated.",
