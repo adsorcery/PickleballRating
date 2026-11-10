@@ -39,7 +39,7 @@ const match = (over: Partial<MatchListItem> = {}): MatchListItem => ({
 
 const row = (over: Partial<LeaderboardRow> = {}): LeaderboardRow => ({
   id: "p1", name: "Nguyễn An", rating: 3.229473, initialRating: 3, games: 20, ratedGames: 20, wins: 12, losses: 8,
-  provisional: false, trend7: 0.0123, trend30: -0.07, streak: { type: "win", length: 4 }, ...over,
+  provisional: false, trend7: 0.0123, trend30: -0.07, streak: { type: "win", length: 4 }, duprRating: null, ...over,
 });
 
 describe("English mode is unchanged and carries no funny content", () => {

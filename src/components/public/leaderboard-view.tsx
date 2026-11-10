@@ -70,10 +70,8 @@ export function LeaderboardView({ rows, recent }: LeaderboardViewProps) {
                         <Link href={`/players/${p.id}`} className="font-semibold hover:underline">
                           {p.name}
                         </Link>
-                        {p.duprRating && (
-                          <div className="text-xs text-muted-foreground">
-                            DUPR: {p.duprRating}
-                          </div>
+                        {p.duprRating != null && (
+                          <span className="tabular ml-2 text-xs text-muted-foreground">DUPR: {p.duprRating.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 2 })}</span>
                         )}
                         {p.provisional && (
                           <Badge
